@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voxtral-backend"
+version = "0.1.0"
+description = "Local speech transcription backend using vLLM Metal with MLX acceleration"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Voxtral"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "websockets>=12.0",
+    "pydantic>=2.5.0",
+    "python-dotenv>=1.0.0",
+    "vllm>=0.6.0",
+    "vllm-metal>=0.1.0",
+    "mistral-common[audio]>=1.9.0",
+    "librosa>=0.10.0",
+    "soxr>=0.3.6",
+    "soundfile>=0.12.0",
+    "numpy>=1.24.0",
+    "transformers>=4.40.0",
+]
+
+[project.scripts]
+voxtral-backend = "voxtral_backend.server:main"
+
+[tool.setuptools.packages.find]
+include = ["voxtral_backend*"]
+
+[tool.setuptools.package-data]
+voxtral_backend = ["py.typed"]

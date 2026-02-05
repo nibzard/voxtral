@@ -1,0 +1,183 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_*.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Import Code Signing Certificate
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" temp.keychain
+          security set-keychain-settings -lut 21600 temp.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" temp.keychain
+
+          # Import certificate
+          echo "$CERTIFICATE_BASE64" | base64 --decode -o certificate.p12
+          security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k temp.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" temp.keychain
+
+          # Set as default keychain
+          security default-keychain -s temp.keychain
+          security list-keychains -s temp.keychain
+          security find-identity -v
+
+      - name: Build and Archive
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild archive \
+            -project VoxtralMenuBar.xcodeproj \
+            -scheme VoxtralMenuBar \
+            -configuration Release \
+            -archivePath build/VoxtralMenuBar.xcarchive \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
+            CODE_SIGN_STYLE="Manual" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_ENTITLEMENTS="VoxtralMenuBar/VoxtralMenuBar.entitlements" \
+            CODE_SIGN_INJECT_BASE_ENTITLEMENTS="NO"
+
+      - name: Export App
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/VoxtralMenuBar.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist ExportOptions.plist \
+            APPLE_TEAM_ID="$APPLE_TEAM_ID"
+
+      - name: Notarize App
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          # Find the app bundle in export directory
+          APP_PATH=$(find build/export -name "*.app" -type d | head -n 1)
+          echo "Notarizing: $APP_PATH"
+
+          # Submit for notarization
+          xcrun notarytool submit "$APP_PATH" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_ID_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait \
+            --output-format plist
+
+          # Staple the ticket
+          xcrun stapler staple "$APP_PATH"
+
+      - name: Create DMG
+        run: |
+          APP_PATH=$(find build/export -name "*.app" -type d | head -n 1)
+          APP_NAME=$(basename "$APP_PATH" .app)
+          OUTPUT_DMGPATH="build/${APP_NAME}.dmg"
+
+          # Create temporary DMG structure
+          TMP_DMGPATH="build/dmg-tmp"
+          mkdir -p "$TMP_DMGPATH"
+          cp -R "$APP_PATH" "$TMP_DMGPATH/"
+
+          # Create symlink to Applications
+          ln -s /Applications "$TMP_DMGPATH/Applications"
+
+          # Create DMG
+          hdiutil create -volname "$APP_NAME" \
+            -srcfolder "$TMP_DMGPATH" \
+            -ov \
+            -format UDZO \
+            "$OUTPUT_DMGPATH"
+
+          echo "Created DMG: $OUTPUT_DMGPATH"
+
+      - name: Create ZIP
+        run: |
+          APP_PATH=$(find build/export -name "*.app" -type d | head -n 1)
+          APP_NAME=$(basename "$APP_PATH" .app)
+          OUTPUT_ZIPPATH="build/${APP_NAME}.zip"
+
+          cd build/export
+          zip -r "../${APP_NAME}.zip" "$APP_NAME.app"
+
+          echo "Created ZIP: $OUTPUT_ZIPPATH"
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          cat > release-notes.md << 'EOF'
+          # Voxtral Menu Bar Transcriber $VERSION
+
+          ## What's Included
+          - macOS menu bar app for live transcription
+          - Local-only transcription (no network required)
+          - Optional Gemini rewrite feature
+
+          ## Installation
+          1. Download and open the DMG or extract the ZIP
+          2. Drag VoxtralMenuBar to Applications
+          3. Launch from Applications (not from the disk image)
+          4. Grant microphone permission when prompted
+          5. Select an output folder for transcripts
+
+          ## System Requirements
+          - Apple Silicon Mac (M1/M2/M3/M4)
+          - macOS 14.0 (Sonoma) or later
+
+          ## Privacy
+          - All transcription happens locally on your Mac
+          - No account required
+          - Optional Gemini rewrite sends transcript to Google only when explicitly enabled
+
+          ## Assets
+          - **VoxtralMenuBar.dmg**: Disk image with drag-and-drop installation
+          - **VoxtralMenuBar.zip**: ZIP archive of the app bundle
+          EOF
+
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          APP_NAME="VoxtralMenuBar"
+
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$APP_NAME $VERSION" \
+            --notes-file release-notes.md \
+            "build/${APP_NAME}.dmg" \
+            "build/${APP_NAME}.zip"
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            build/*.dmg
+            build/*.zip
+            release-notes.md

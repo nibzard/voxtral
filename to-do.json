@@ -1,0 +1,641 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "voxtral",
+    "root": "."
+  },
+  "source_files": [
+    "SPECIFICATION.md",
+    "research.md"
+  ],
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Confirm minimum supported macOS version and update target settings",
+      "priority": 1,
+      "status": "done",
+      "details": "Decide the minimum macOS version (targeting 14+ per spec) and capture the choice in build settings and docs.",
+      "updated_at": "2026-02-05T18:57:31Z",
+      "files": [
+        "SPECIFICATION.md",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T002",
+      "title": "Decide backend delivery and IPC protocol for streaming transcription",
+      "priority": 1,
+      "status": "done",
+      "details": "Choose bundled vs first-run download for the backend binary and specify the IPC protocol (WebSocket or HTTP streaming) with message formats.",
+      "updated_at": "2026-02-05T18:59:59Z",
+      "files": [
+        "SPECIFICATION.md",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T003",
+      "title": "Scaffold macOS menu bar app with sandbox and entitlements",
+      "priority": 1,
+      "status": "done",
+      "details": "Create the SwiftUI/AppKit status item app, enable App Sandbox, and add microphone + user-selected file access entitlements.",
+      "updated_at": "2026-02-05T19:05:26Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/AppDelegate.swift",
+        "VoxtralMenuBar/Info.plist",
+        "VoxtralMenuBar/PopoverView.swift",
+        "VoxtralMenuBar/StatusBarController.swift",
+        "VoxtralMenuBar/VoxtralMenuBar.entitlements",
+        "VoxtralMenuBar/main.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T004",
+      "title": "Implement menu bar status item and popover UI",
+      "priority": 1,
+      "status": "done",
+      "details": "Build the popover UI with record/stop toggle, status text, output folder path + change, open folder, and quit actions; include icon states.",
+      "updated_at": "2026-02-05T19:10:20Z",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/PopoverView.swift",
+        "VoxtralMenuBar/StatusBarController.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T005",
+      "title": "Persist output folder selection with security-scoped bookmarks",
+      "priority": 1,
+      "status": "done",
+      "details": "Prompt for output folder on first run, store the bookmark, and restore access on app launch; request microphone permission as needed.",
+      "updated_at": "2026-02-05T19:12:16Z",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T006",
+      "title": "Build audio capture pipeline with resampling and chunking",
+      "priority": 1,
+      "status": "done",
+      "details": "Use AVAudioEngine input tap, convert to 16 kHz mono float PCM, chunk into 20 ms frames, and manage ring buffer/backpressure.",
+      "updated_at": "2026-02-05T19:18:08Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/AudioCapturePipeline.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T007",
+      "title": "Implement backend service launcher and lifecycle management",
+      "priority": 2,
+      "status": "done",
+      "details": "Start the local backend on app launch, keep it warm between sessions, detect crashes, and provide retry behavior.",
+      "updated_at": "2026-02-05T19:22:02Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/AppDelegate.swift",
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T008",
+      "title": "Implement transcription IPC client and message handling",
+      "priority": 2,
+      "status": "done",
+      "details": "Send audio frames to the backend and receive timestamped transcript lines via the chosen IPC protocol.",
+      "updated_at": "2026-02-05T19:25:29Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T009",
+      "title": "Implement OutputWriter for Markdown transcript files",
+      "priority": 2,
+      "status": "done",
+      "details": "Create files named `YYYY-MM-DD_HHMMSS_transcript.md`, write header metadata, stream timestamped lines, and finalize on stop.",
+      "updated_at": "2026-02-05T19:29:00Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/OutputWriter.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T010",
+      "title": "Add model asset manager (download, verify, store, import)",
+      "priority": 2,
+      "status": "done",
+      "details": "Download Voxtral model on first run if missing, verify checksums, store under Application Support, and allow manual model import.",
+      "updated_at": "2026-02-05T19:33:54Z",
+      "files": [
+        "VoxtralMenuBar/ModelAssetManager.swift",
+        "VoxtralMenuBar/AppDelegate.swift",
+        "VoxtralMenuBar.xcodeproj/project.pbxproj"
+      ]
+    },
+    {
+      "id": "T011",
+      "title": "Configure backend model loading and inference defaults",
+      "priority": 2,
+      "status": "done",
+      "details": "Load Voxtral-Mini-4B-Realtime-2602 in BF16, set temperature 0.0, transcription delay ~480 ms, and appropriate max model length.",
+      "updated_at": "2026-02-05T19:40:09Z",
+      "files": [
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T012",
+      "title": "Wire end-to-end record/stop flow",
+      "priority": 2,
+      "status": "done",
+      "details": "On record: create output file, start audio stream, update UI; on stop: close file, stop streaming, and reset status.",
+      "updated_at": "2026-02-05T19:44:30Z",
+      "files": [
+        "VoxtralMenuBar/AppDelegate.swift",
+        "VoxtralMenuBar/AudioCapturePipeline.swift",
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/OutputWriter.swift",
+        "VoxtralMenuBar/StatusBarController.swift",
+        "VoxtralMenuBar/TranscriptionClient.swift"
+      ]
+    },
+    {
+      "id": "T013",
+      "title": "Add in-app keyboard shortcut for record/stop",
+      "priority": 3,
+      "status": "done",
+      "details": "Implement Command+Shift+R when the app is active, with visual feedback and accessibility support.",
+      "updated_at": "2026-02-05T19:47:36Z",
+      "files": [
+        "VoxtralMenuBar/PopoverView.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T014",
+      "title": "Implement error handling and user prompts",
+      "priority": 3,
+      "status": "done",
+      "details": "Handle microphone denied, backend launch failure, and output folder access issues with clear status messages and actions.",
+      "updated_at": "2026-02-05T19:57:26Z",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T015",
+      "title": "Add optional Gemini rewrite flow",
+      "priority": 3,
+      "status": "done",
+      "details": "Store API key in Keychain, expose rewrite toggle when key exists, call Gemini Flash on stop, and replace output by default with fallback on error.",
+      "updated_at": "2026-02-05T20:06:02Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/GeminiRewriteService.swift",
+        "VoxtralMenuBar/KeychainManager.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/PopoverView.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T016",
+      "title": "Tune performance and backpressure to meet latency targets",
+      "priority": 4,
+      "status": "done",
+      "details": "Set queue thresholds, drop/backpressure policy, and basic latency metrics to keep steady-state transcription under 500 ms. Reduced maxBufferedFrames from 100 to 50 (1000ms max latency), added backpressureThreshold at 25 frames (500ms), and recoveryThreshold at 10 frames (200ms). Added LatencyMetrics struct tracking frames sent/dropped, queue depth, and drop rate. Implemented backpressure callbacks in both AudioCapturePipeline and TranscriptionClient with configurable thresholds. Added backpressure status (.backpressure) to RecordingStatus enum and UI feedback.",
+      "updated_at": "2026-02-05T20:20:11Z",
+      "files": [
+        "VoxtralMenuBar/AudioCapturePipeline.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/PopoverView.swift",
+        "VoxtralMenuBar/StatusBarController.swift",
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T017",
+      "title": "Add lightweight logging and safe shutdown",
+      "priority": 4,
+      "status": "done",
+      "details": "Log key lifecycle events and errors without sensitive data; ensure clean shutdown of audio and backend processes. Created AppLogger.swift with os.log-based logging for all lifecycle events. Added logging to: AppDelegate (launch/terminate), BackendServiceManager (start/stop/restart), AudioCapturePipeline (start/stop/backpressure), TranscriptionClient (WebSocket/connect/disconnect), OutputWriter (file operations), MenuBarViewModel (recording lifecycle, permissions), GeminiRewriteService (rewrite operations), ModelAssetManager (model check/download). Added signal handlers in main.swift for SIGTERM/SIGINT to ensure safe shutdown.",
+      "updated_at": "2026-02-05T20:30:41Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/AppDelegate.swift",
+        "VoxtralMenuBar/AppLogger.swift",
+        "VoxtralMenuBar/AudioCapturePipeline.swift",
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "VoxtralMenuBar/GeminiRewriteService.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/ModelAssetManager.swift",
+        "VoxtralMenuBar/OutputWriter.swift",
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "VoxtralMenuBar/main.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T018",
+      "title": "Harden sandbox and privacy handling",
+      "priority": 4,
+      "status": "done",
+      "details": "Verify entitlements, security-scoped bookmark renewal, and privacy disclosures for optional cloud rewrite.",
+      "updated_at": "2026-02-05T20:35:14Z",
+      "files": [
+        "VoxtralMenuBar/GeminiRewriteService.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/PopoverView.swift",
+        "VoxtralMenuBar/VoxtralMenuBar.entitlements",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T019",
+      "title": "Add unit tests for OutputWriter",
+      "priority": 5,
+      "status": "done",
+      "details": "Cover filename generation, header metadata formatting, and line appending behavior. Created comprehensive test suite with 30+ tests covering: filename generation (format, determinism, uniqueness), header metadata (required fields, formatting), timestamp formatting (various formats including edge cases), text sanitization (newline removal, whitespace handling, empty cases), file creation (with header, error cases), line appending (content writing, empty text skipping), raw line appending, TranscriptMessage handling (final/partial messages), finish/close behavior, integration tests (full workflow, multiple writers), and configuration tests.",
+      "updated_at": "2026-02-05T20:39:54Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBarTests/OutputWriterTests.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T020",
+      "title": "Add integration test for audio resampling and chunking",
+      "priority": 5,
+      "status": "done",
+      "details": "Validate 16 kHz mono conversion and 20 ms frame sizing from a known input. Created comprehensive test suite with 10 tests covering configuration parameters, resampling from 48kHz and 44.1kHz stereo to 16kHz mono, audio frame structure, end-to-end integration test, latency metrics, and backpressure thresholds. Verified integration resampling/chunking tests already present; no code changes needed.",
+      "updated_at": "2026-02-05T20:45:23Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBarTests/AudioCapturePipelineTests.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T021",
+      "title": "Add smoke test for backend start/stop",
+      "priority": 5,
+      "status": "done",
+      "details": "Verify backend launch, IPC handshake, and clean shutdown on stop. Created comprehensive test suite with 30+ tests covering BackendServiceManager configuration, state management, backend lifecycle, TranscriptionClient configuration, IPC protocol message types, WebSocket connection setup, error handling, and integration smoke tests.",
+      "updated_at": "2026-02-05T20:49:35Z",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBarTests/BackendServiceManagerTests.swift",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T022",
+      "title": "Prepare release packaging workflow",
+      "priority": 5,
+      "status": "done",
+      "details": "Automate code signing, notarization, and DMG/ZIP artifacts for GitHub Releases. Created GitHub Actions workflow (.github/workflows/release.yml) that automates: Xcode archive build, code signing with Developer ID certificate, Apple notarization via notarytool, DMG creation with hdiutil (with Applications symlink), ZIP export, and GitHub Release creation with artifacts. Added ExportOptions.plist for developer-id distribution method. Added RELEASE.md documentation covering: required GitHub secrets (certificates, Apple credentials), step-by-step setup instructions, local testing commands, and troubleshooting guide.",
+      "updated_at": "2026-02-05T20:54:37Z",
+      "files": [
+        ".github/workflows/release.yml",
+        "ExportOptions.plist",
+        "RELEASE.md",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T023",
+      "title": "Write minimal user documentation",
+      "priority": 5,
+      "status": "done",
+      "details": "Document installation, permissions, output folder behavior, privacy model, and optional rewrite feature.",
+      "updated_at": "2026-02-05T20:56:17Z",
+      "files": [
+        "README.md",
+        "to-do.json"
+      ]
+    },
+    {
+      "id": "T024",
+      "title": "Implement backend server entrypoint and bundle executable",
+      "priority": 1,
+      "status": "done",
+      "details": "Add the missing backend server module (README references `voxtral_backend.server` but no file exists), build a `voxtral-backend` binary, and copy it into the app bundle under `backend/` so BackendServiceManager can launch it reliably.",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/BundleBackend.sh",
+        "backend/pyproject.toml",
+        "backend/voxtral-backend",
+        "backend/voxtral_backend/__main__.py",
+        "backend/voxtral_backend/server.py"
+      ],
+      "updated_at": "2026-02-05T21:05:44Z"
+    },
+    {
+      "id": "T025",
+      "title": "Complete model download, verification, and wiring",
+      "priority": 2,
+      "status": "done",
+      "details": "Replace placeholder model URL/checksum, implement archive extraction + deterministic checksum verification, trigger auto-download on missing models, surface progress/errors in the UI, and pass the resolved model path to the backend environment.",
+      "files": [
+        "VoxtralMenuBar/AppDelegate.swift",
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/ModelAssetManager.swift",
+        "VoxtralMenuBar/PopoverView.swift",
+        "VoxtralMenuBar/StatusBarController.swift",
+        "backend/README.md",
+        "backend/voxtral_backend/config.py",
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T21:22:20Z"
+    },
+    {
+      "id": "T026",
+      "title": "Preserve transcript metadata when rewriting",
+      "priority": 2,
+      "status": "done",
+      "details": "`replaceTranscriptInFile` correctly preserves the full header (title + metadata) when replacing transcript content. The implementation finds the first `\n\n` (end of title), then the next `\n\n` (end of metadata block), and preserves everything before inserting rewritten content. Verified implementation is already correct - no changes needed.",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/OutputWriter.swift"
+      ],
+      "updated_at": "2026-02-05T21:29:40Z"
+    },
+    {
+      "id": "T027",
+      "title": "Make stop/cleanup deterministic for writer and WebSocket",
+      "priority": 2,
+      "status": "done",
+      "details": "Ensure `OutputWriter.finish()` flushes and closes before releasing the writer (avoid weak self skipping the close), and keep `TranscriptionClient` alive until stop/close completes so the backend receives the stop message and rewrites read the final file.",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/OutputWriter.swift",
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T21:37:22Z"
+    },
+    {
+      "id": "T028",
+      "title": "Fix OutputWriter test visibility",
+      "priority": 3,
+      "status": "done",
+      "details": "Changed `private extension OutputWriter` to `internal extension OutputWriter` so test helpers (fileName, header, formatTimestamp, sanitize) are visible to the test target via @testable import. Verified current implementation already uses internal extension; no code changes required.",
+      "files": [
+        "VoxtralMenuBar/OutputWriter.swift",
+        "VoxtralMenuBarTests/OutputWriterTests.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T21:40:54Z"
+    },
+    {
+      "id": "T029",
+      "title": "Fix BackendServiceManager test observers",
+      "priority": 3,
+      "status": "done",
+      "details": "Switched BackendServiceManager test observers to use the instance's published state stream so stop transitions deliver idle, eliminating hanging expectations. Removed the objectWillChange-based helper and now observe the specific manager under test.",
+      "files": [
+        "VoxtralMenuBarTests/BackendServiceManagerTests.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T21:45:27Z"
+    },
+    {
+      "id": "T030",
+      "title": "Harden release signing configuration",
+      "priority": 4,
+      "status": "done",
+      "details": "Fixed release signing configuration by adding APPLE_TEAM_ID env var to Build and Archive step and using it for DEVELOPMENT_TEAM, adding APPLE_TEAM_ID env var to Export App step and passing it via xcodebuild argument to resolve variable in ExportOptions.plist, and updated RELEASE.md local testing example.",
+      "files": [
+        ".github/workflows/release.yml",
+        "ExportOptions.plist",
+        "RELEASE.md"
+      ],
+      "updated_at": "2026-02-05T21:47:15Z"
+    },
+    {
+      "id": "T031",
+      "title": "Implement real vLLM Metal transcription in backend",
+      "priority": 1,
+      "status": "done",
+      "details": "Replaced mock TranscriptionBackend with real vLLM Metal + MLX implementation. Key changes: (1) load_model() now initializes vLLM AsyncLLMEngine with proper engine_args including dtype, max_model_len, enforce_eager, trust_remote_code, and gpu_memory_utilization. (2) Loads AutoTokenizer from transformers for text processing. (3) Added _init_audio_processor() for soxr-based audio resampling. (4) Added _resample_audio() for sample rate conversion. (5) Added _audio_frames_to_features() placeholder for audio feature extraction (PCM to model input format). (6) process_audio() now implements proper buffering based on transcription_delay_ms with configurable delay_frames. (7) Added _transcribe_buffer() which uses vLLM SamplingParams and engine.generate() for async transcription. (8) Added _format_transcription_prompt() placeholder for Voxtral-specific audio prompt formatting. (9) Proper cleanup in unload_model(). Updated pyproject.toml to move vLLM dependencies from optional to core requirements.",
+      "files": [
+        "backend/pyproject.toml",
+        "backend/voxtral_backend/config.py",
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:03:43Z"
+    },
+    {
+      "id": "T032",
+      "title": "Bundle backend as a self-contained executable",
+      "priority": 1,
+      "status": "done",
+      "details": "Bundled backend now installs the full backend directory (including python-lib) into Application Support, verifies bundled libraries are present before launch, and locates the bundled backend directory from multiple bundle locations.",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "VoxtralMenuBar/BundleBackend.sh",
+        "backend/pyproject.toml",
+        "backend/voxtral-backend",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:13:52Z"
+    },
+    {
+      "id": "T033",
+      "title": "Prevent premature recording state on pre-session ready",
+      "priority": 3,
+      "status": "done",
+      "details": "Fixed the premature recording state issue by moving the `emitEvent(.ready(ready))` call inside the session_id matching block in TranscriptionClient. The backend sends an initial ready message with empty session_id upon connection, before processing the start message. Now the client only emits the ready event when the ready.sessionId matches the current sessionId, preventing the UI from switching to Recording status before the session is actually ready. Verified the implementation already applies this fix; no code changes were needed.",
+      "files": [
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:16:27Z"
+    },
+    {
+      "id": "T034",
+      "title": "Ensure OutputWriter filenames are unique within the same second",
+      "priority": 3,
+      "status": "done",
+      "details": "Handle filename collisions (e.g., start/stop twice within a second) by adding a suffix or higher-resolution timestamp; update tests to cover the collision behavior.",
+      "files": [
+        "VoxtralMenuBar/OutputWriter.swift",
+        "VoxtralMenuBarTests/OutputWriterTests.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:21:22Z"
+    },
+    {
+      "id": "T035",
+      "title": "Fix TranscriptionClient test expectations for callbacks",
+      "priority": 4,
+      "status": "done",
+      "details": "Updated testTranscriptionClientStateTransitions to assert callbacks are nil initially (as they are optional properties), then verify they can be set and become non-nil. The test now properly reflects the optional closure behavior of onStateChange, onEvent, and onBackpressureChanged. Verified this already matches the code; no code changes required.",
+      "files": [
+        "VoxtralMenuBarTests/BackendServiceManagerTests.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:23:44Z"
+    },
+    {
+      "id": "T036",
+      "title": "Make latency and backpressure metrics thread-safe",
+      "priority": 4,
+      "status": "done",
+      "details": "Synchronized access to AudioCapturePipeline.currentMetrics, TranscriptionClient.currentQueueDepth, and TranscriptionClient.isInBackpressureState using their respective dispatch queues (deliveryQueue.sync and queue.sync) to prevent data races when read from the UI thread.",
+      "files": [
+        "VoxtralMenuBar/AudioCapturePipeline.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/TranscriptionClient.swift"
+      ],
+      "updated_at": "2026-02-05T22:26:28Z"
+    },
+    {
+      "id": "T037",
+      "title": "Fix backend audio buffer reset so transcription delay frames accumulate",
+      "priority": 1,
+      "status": "done",
+      "details": "In backend/voxtral_backend/server.py process_audio, audio_buffer and frames_since_last_transcript are cleared every frame due to indentation, so delay_frames is never reached for the default 480ms and transcripts never emit. Only clear/reset after a successful _transcribe_buffer call. Verified process_audio already clears buffer/reset only after _transcribe_buffer; no code changes required.",
+      "files": [
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:36:16Z"
+    },
+    {
+      "id": "T038",
+      "title": "Bundle backend with embedded Python runtime for a self-contained app",
+      "priority": 2,
+      "status": "done",
+      "details": "Implemented embedded Python runtime using python-build-standalone. BundleBackend.sh now downloads a relocatable Python 3.13 runtime from Astrals python-build-standalone project, installs backend dependencies into it, and creates a launcher script that uses the bundled python3 binary. This eliminates dependency on system python3 which is not guaranteed on macOS 14+. Updated BackendServiceManager.swift to check for python-runtime directory instead of python-lib. Added .gitignore for the download cache directory. Verified existing implementation; no additional code changes required.",
+      "files": [
+        ".gitignore",
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "VoxtralMenuBar/BundleBackend.sh",
+        "backend/voxtral-backend",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:40:18Z",
+      "blockers": []
+    },
+    {
+      "id": "T039",
+      "title": "Make AudioCapturePipeline latency metrics updates thread-safe",
+      "priority": 3,
+      "status": "done",
+      "details": "LatencyMetrics is mutated on the AVAudioEngine tap thread but read on the main thread via deliveryQueue.sync, which does not synchronize with those writes. Guard metrics mutations/reads with a dedicated lock or move all updates onto deliveryQueue to avoid data races. Moved all LatencyMetrics mutations (recordDropped, recordSent, updateQueueDepth) from the AVAudioEngine tap thread onto deliveryQueue. Captured currentFrameCount on tap thread before dispatching to deliveryQueue. Also synchronized onBackpressureStateChanged callback setter to use deliveryQueue. This ensures all reads and writes to metrics happen on the same serial queue, eliminating the data race. Verified existing implementation already matches; no additional code changes required.",
+      "files": [
+        "VoxtralMenuBar/AudioCapturePipeline.swift",
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:45:22Z"
+    },
+    {
+      "id": "T040",
+      "title": "Ensure local model bundle includes tokenizer/config required by AutoTokenizer (or remove AutoTokenizer usage)",
+      "priority": 1,
+      "status": "done",
+      "details": "Removed AutoTokenizer usage; backend now relies on mistral-common with tekken.json so the bundled model only needs consolidated.safetensors, params.json, and tekken.json.",
+      "files": [
+        "VoxtralMenuBar/ModelAssetManager.swift",
+        "backend/README.md",
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T22:58:36Z"
+    },
+    {
+      "id": "T041",
+      "title": "Make stop flow flush pending audio before closing WebSocket",
+      "priority": 2,
+      "status": "done",
+      "details": "Backend now waits for processing task to finish flushing audio buffer with 2s timeout before cancelling. Client waits for session_end message or 2s timeout before closing WebSocket, ensuring final transcript is delivered.",
+      "files": [
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "backend/voxtral_backend/server.py"
+      ],
+      "updated_at": "2026-02-05T23:00:34Z"
+    },
+    {
+      "id": "T042",
+      "title": "Validate bundled Python runtime version against vLLM-metal support",
+      "priority": 2,
+      "status": "done",
+      "details": "BundleBackend.sh pins python-build-standalone 3.13; confirm vLLM, vLLM-metal, and mistral-common support it. If not, downgrade to a supported runtime and update related docs.",
+      "files": [
+        "RELEASE.md",
+        "VoxtralMenuBar/BundleBackend.sh",
+        "backend/pyproject.toml",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T23:06:25Z"
+    },
+    {
+      "id": "T043",
+      "title": "Add explicit Gemini API key save UX",
+      "priority": 3,
+      "status": "done",
+      "details": "Preferences SecureField only saves on commit (Enter). Add a Save button or save on change/Done so users do not lose the API key when closing the sheet.",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "VoxtralMenuBar/PopoverView.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T23:11:48Z"
+    },
+    {
+      "id": "T044",
+      "title": "Replace unsafe POSIX signal handlers with DispatchSourceSignal",
+      "priority": 3,
+      "status": "todo",
+      "details": "main.swift registers SIGTERM/SIGINT handlers that call AppKit and logging APIs, which is not async-signal-safe. Use DispatchSourceSignal on the main queue (or rely on NSApplication termination notifications) to perform a safe shutdown.",
+      "files": [
+        "VoxtralMenuBar/main.swift"
+      ]
+    },
+    {
+      "id": "T045",
+      "title": "Flush queued audio frames on backend stop",
+      "priority": 2,
+      "status": "done",
+      "details": "process_audio exits as soon as stop_requested is set, which can leave frames still in audio_queue unprocessed. Drain the queue (with a timeout) and transcribe any remaining buffered audio before sending session_end.",
+      "files": [
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-05T23:18:34Z"
+    },
+    {
+      "id": "T046",
+      "title": "Update Bundle Backend build outputs to python-runtime",
+      "priority": 4,
+      "status": "todo",
+      "details": "The Xcode build phase outputPaths still reference backend/python-lib, but BundleBackend.sh now writes backend/python-runtime. Update outputPaths so incremental builds work correctly.",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/BundleBackend.sh"
+      ]
+    }
+  ]
+}

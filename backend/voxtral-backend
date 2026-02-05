@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""voxtral-backend: Standalone entry point for the Voxtral transcription backend.
+
+This is a reference entry point. The actual bundled executable is generated
+by BundleBackend.sh in the macOS app build process.
+
+For development: Run with `python3 -m voxtral_backend.server` or execute this script directly.
+For production: The BundleBackend.sh script creates a self-contained Python runtime
+with all dependencies bundled, eliminating the need for system python3.
+"""
+
+import sys
+import os
+
+# Add the backend directory to path for development
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from voxtral_backend.server import main
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,458 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FB6038E4DA8F4A2FA426E38E /* AudioCapturePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */; };
+		6A3D9F2B1C4E5D6F7A8B9C0D /* BackendServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B7E5C1A0D94A3E8C0B9E1A /* BackendServiceManager.swift */; };
+		9A1B2C3D4E5F6789ABCD0123 /* TranscriptionClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */; };
+		98D78B031D5B4720B4073869 /* OutputWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C042A1E6204A61B963B14A /* OutputWriter.swift */; };
+		3B8C7D4E9A2F5E1B4C6D8E3A /* ModelAssetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */; };
+		5F2BF866898F427EA900266E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */; };
+		6801CE5C1EF748B78C58E481 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4011287DC7244272BF18764C /* StatusBarController.swift */; };
+		14D05E95931E49959651F872 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D2D7D75CED48A1A256C58E /* PopoverView.swift */; };
+		23A58245EF104A8FB5CEB866 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26A5414757A46078105C1FB /* main.swift */; };
+		1A2B3C4D5E6F7890ABCD1234 /* MenuBarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C2 /* MenuBarViewModel.swift */; };
+		7B3C8D5E1A2F4B6C9D0E8F3A /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D4E5F6B7C8D9E0F1A2B3C4 /* KeychainManager.swift */; };
+		8E5F6A7B2C3D4E5F6A7B8C9D0 /* GeminiRewriteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B3 /* GeminiRewriteService.swift */; };
+		4A5B6C7D8E9F0A1B2C3D4E5F /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A8B9C0D1E2F3A4 /* AppLogger.swift */; };
+		1426A4D030394A65A85DAC89 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 985208AAC4704C8CA15DF297 /* AppKit.framework */; };
+		094C3D74B9CF482497E35F89 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53885F96424B41A69556ED95 /* SwiftUI.framework */; };
+		C69674E739F046F1A5F3EA8C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CAC63FC5B654773AB21A134 /* Foundation.framework */; };
+		AA11BB22CC33DD44EE55FF66 /* OutputWriterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11CC22DD33EE44FF55AA66 /* OutputWriterTests.swift */; };
+		FF22AA33BB44CC55DD66EE77 /* AudioCapturePipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA22BB33CC44DD55EE66FF77 /* AudioCapturePipelineTests.swift */; };
+		BB33CC44DD55EE66FF77AA88 /* BackendServiceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC44DD55EE66FF77AA88BB99 /* BackendServiceManagerTests.swift */; };
+		CC11DD22EE33FF44AA55BB77 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33AA44BB55CC88 /* XCTest.framework */; };
+		EE11FF22AA33BB44CC55DD99 /* VoxtralMenuBar.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF11AA22BB33CC44DD55EE00 /* VoxtralMenuBar.framework */; };
+		BKEND0001BUILD /* BundleBackend.sh in Sources */ = {isa = PBXBuildFile; fileRef = BKEND0001SCRIPT /* BundleBackend.sh */; settings = {ATTRIBUTES = (RunScript, ); }; };
+		8C185F8662FA4BB45F6174B9 /* backend-bundle in Copy Backend to Bundle */ = {isa = PBXBuildFile; fileRef = 554358D49E1D48E5A58D479D /* backend-bundle */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		12F23AEFCD64C9A38ADAABDC /* Copy Backend to Bundle */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = backend;
+			dstSubfolderSpec = 0;
+			files = (
+				8C185F8662FA4BB45F6174B9 /* backend-bundle in Copy Backend to Bundle */,
+			);
+			name = "Copy Backend to Bundle";
+			runOnlyForDeploymentPostprocessing = 0;
+			symbolicLinks = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		1122BB33CC44DD55EE66FF77 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C3D047872DAF4D28929D5585 /* Project object */;
+			proxyType = 1;
+			remoteGlobalID = 8BEB8E7CD08F4F5EA00ABBB9;
+			remoteInfo = VoxtralMenuBar;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapturePipeline.swift; sourceTree = "<group>"; };
+		F2B7E5C1A0D94A4E8C0B9E1A /* BackendServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendServiceManager.swift; sourceTree = "<group>"; };
+		B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionClient.swift; sourceTree = "<group>"; };
+		32C042A1E6204A61B963B14A /* OutputWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputWriter.swift; sourceTree = "<group>"; };
+		E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelAssetManager.swift; sourceTree = "<group>"; };
+		3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		4011287DC7244272BF18764C /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		C7D2D7D75CED48A1A256C58E /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+		C26A5414757A46078105C1FB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1C2 /* MenuBarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarViewModel.swift; sourceTree = "<group>"; };
+		A1D4E5F6B7C8D9E0F1A2B3C4 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		C2D3E4F5A6B7C8D9E0F1A2B3 /* GeminiRewriteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiRewriteService.swift; sourceTree = "<group>"; };
+		B3C4D5E6F7A8B9C0D1E2F3A4 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		DF8FCD3FF63E4938AAA88E2B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		329953FCB9E944DDA7E6D553 /* VoxtralMenuBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VoxtralMenuBar.entitlements; sourceTree = "<group>"; };
+		A7B2C3D4E5F6789ABCD0124 /* backend */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ../backend; sourceTree = "<group>"; };
+		554358D49E1D48E5A58D479D /* backend-bundle */ = {isa = PBXFileReference; lastKnownFileType = folder; path = backend; sourceTree = BUILT_PRODUCTS_DIR; };
+		2745BB426B7F48F2A58FB92B /* VoxtralMenuBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = VoxtralMenuBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		985208AAC4704C8CA15DF297 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		53885F96424B41A69556ED95 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		0CAC63FC5B654773AB21A134 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		BB11CC22DD33EE44FF55AA66 /* OutputWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputWriterTests.swift; sourceTree = "<group>"; };
+		AA22BB33CC44DD55EE66FF77 /* AudioCapturePipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapturePipelineTests.swift; sourceTree = "<group>"; };
+		CC44DD55EE66FF77AA88BB99 /* BackendServiceManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendServiceManagerTests.swift; sourceTree = "<group>"; };
+		DD11EE22FF33AA44BB55CC88 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+		9988AA77BB66CC55DD44EE33 /* VoxtralMenuBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = VoxtralMenuBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FF11AA22BB33CC44DD55EE00 /* VoxtralMenuBar.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VoxtralMenuBar.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BKEND0001SCRIPT /* BundleBackend.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = BundleBackend.sh; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		065D0ECB4BDB4628B10C38DA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1426A4D030394A65A85DAC89 /* AppKit.framework in Frameworks */,
+				094C3D74B9CF482497E35F89 /* SwiftUI.framework in Frameworks */,
+				C69674E739F046F1A5F3EA8C /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7766AA55BB44CC33DD22EE11 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC11DD22EE33FF44AA55BB77 /* XCTest.framework in Frameworks */,
+				EE11FF22AA33BB44CC55DD99 /* VoxtralMenuBar.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		84BDEC9D862949C88A85AAB1 = {
+			isa = PBXGroup;
+			children = (
+				7B02ED1294A74B2DAA83CD2D /* VoxtralMenuBar */,
+				AABBCC22DD33EE44FF55AA77 /* VoxtralMenuBarTests */,
+				A7B2C3D4E5F6789ABCD0124 /* backend */,
+				A916DAD6F30C407C8AC8365A /* Frameworks */,
+				3E5C30337D324F0DAAC36F19 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7B02ED1294A74B2DAA83CD2D /* VoxtralMenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */,
+				F2B7E5C1A0D94A3E8C0B9E1A /* BackendServiceManager.swift */,
+				B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */,
+				32C042A1E6204A61B963B14A /* OutputWriter.swift */,
+				E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */,
+				3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */,
+				4011287DC7244272BF18764C /* StatusBarController.swift */,
+				C7D2D7D75CED48A1A256C58E /* PopoverView.swift */,
+				C26A5414757A46078105C1FB /* main.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C2 /* MenuBarViewModel.swift */,
+				A1D4E5F6B7C8D9E0F1A2B3C4 /* KeychainManager.swift */,
+				C2D3E4F5A6B7C8D9E0F1A2B3 /* GeminiRewriteService.swift */,
+				B3C4D5E6F7A8B9C0D1E2F3A4 /* AppLogger.swift */,
+				DF8FCD3FF63E4938AAA88E2B /* Info.plist */,
+				329953FCB9E944DDA7E6D553 /* VoxtralMenuBar.entitlements */,
+				BKEND0001SCRIPT /* BundleBackend.sh */,
+			);
+			path = VoxtralMenuBar;
+			sourceTree = "<group>";
+		};
+		AABBCC22DD33EE44FF55AA77 /* VoxtralMenuBarTests */ = {
+			isa = PBXGroup;
+			children = (
+				BB11CC22DD33EE44FF55AA66 /* OutputWriterTests.swift */,
+				AA22BB33CC44DD55EE66FF77 /* AudioCapturePipelineTests.swift */,
+				CC44DD55EE66FF77AA88BB99 /* BackendServiceManagerTests.swift */,
+			);
+			path = VoxtralMenuBarTests;
+			sourceTree = "<group>";
+		};
+		A7B2C3D4E5F6789ABCD0124 /* backend */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ../backend;
+			sourceTree = "<group>";
+		};
+		3E5C30337D324F0DAAC36F19 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2745BB426B7F48F2A58FB92B /* VoxtralMenuBar.app */,
+				9988AA77BB66CC55DD44EE33 /* VoxtralMenuBarTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A916DAD6F30C407C8AC8365A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				985208AAC4704C8CA15DF297 /* AppKit.framework */,
+				53885F96424B41A69556ED95 /* SwiftUI.framework */,
+				0CAC63FC5B654773AB21A134 /* Foundation.framework */,
+				DD11EE22FF33AA44BB55CC88 /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8BEB8E7CD08F4F5EA00ABBB9 /* VoxtralMenuBar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1C335DD7B7E2415BA378C498 /* Build configuration list for PBXNativeTarget "VoxtralMenuBar" */;
+			buildPhases = (
+				30B194374B0F486E8A8D08EC /* Sources */,
+				065D0ECB4BDB4628B10C38DA /* Frameworks */,
+				50957515F5AE4608BCD3A711 /* Resources */,
+				BKEND0002PHASE /* Bundle Backend */,
+				12F23AEFCD64C9A38ADAABDC /* Copy Backend to Bundle */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VoxtralMenuBar;
+			productName = VoxtralMenuBar;
+			productReference = 2745BB426B7F48F2A58FB92B /* VoxtralMenuBar.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8877AA66BB55CC44DD33EE22 /* VoxtralMenuBarTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5544AA33BB22CC11DD00FF99 /* Build configuration list for PBXNativeTarget "VoxtralMenuBarTests" */;
+			buildPhases = (
+				6633AA22BB11CC00DD99EE88 /* Sources */,
+				7766AA55BB44CC33DD22EE11 /* Frameworks */,
+				8855AA44BB33DD22EE11AA00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9944AA33BB22DD11EE00FF00 /* PBXTargetDependency */,
+			);
+			name = VoxtralMenuBarTests;
+			productName = VoxtralMenuBarTests;
+			productReference = 9988AA77BB66CC55DD44EE33 /* VoxtralMenuBarTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C3D047872DAF4D28929D5585 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = D655C9EF0AD348509B6D6B84 /* Build configuration list for PBXProject "VoxtralMenuBar" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 84BDEC9D862949C88A85AAB1;
+			productRefGroup = 3E5C30337D324F0DAAC36F19 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8BEB8E7CD08F4F5EA00ABBB9 /* VoxtralMenuBar */,
+				8877AA66BB55CC44DD33EE22 /* VoxtralMenuBarTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		50957515F5AE4608BCD3A711 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8855AA44BB33DD22EE11AA00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BKEND0002PHASE /* Bundle Backend */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../backend/pyproject.toml",
+				"$(SRCROOT)/VoxtralMenuBar/BundleBackend.sh",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/backend/voxtral-backend",
+				"$(BUILT_PRODUCTS_DIR)/backend/python-lib",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/VoxtralMenuBar/BundleBackend.sh\"";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		30B194374B0F486E8A8D08EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB6038E4DA8F4A2FA426E38E /* AudioCapturePipeline.swift in Sources */,
+				6A3D9F2B1C4E5D6F7A8B9C0D /* BackendServiceManager.swift in Sources */,
+				9A1B2C3D4E5F6789ABCD0123 /* TranscriptionClient.swift in Sources */,
+				98D78B031D5B4720B4073869 /* OutputWriter.swift in Sources */,
+				3B8C7D4E9A2F5E1B4C6D8E3A /* ModelAssetManager.swift in Sources */,
+				5F2BF866898F427EA900266E /* AppDelegate.swift in Sources */,
+				6801CE5C1EF748B78C58E481 /* StatusBarController.swift in Sources */,
+				14D05E95931E49959651F872 /* PopoverView.swift in Sources */,
+				23A58245EF104A8FB5CEB866 /* main.swift in Sources */,
+				1A2B3C4D5E6F7890ABCD1234 /* MenuBarViewModel.swift in Sources */,
+				7B3C8D5E1A2F4B6C9D0E8F3A /* KeychainManager.swift in Sources */,
+				8E5F6A7B2C3D4E5F6A7B8C9D0 /* GeminiRewriteService.swift in Sources */,
+				4A5B6C7D8E9F0A1B2C3D4E5F /* AppLogger.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6633AA22BB11CC00DD99EE88 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA11BB22CC33DD44EE55FF66 /* OutputWriterTests.swift in Sources */,
+				FF22AA33BB44CC55DD66EE77 /* AudioCapturePipelineTests.swift in Sources */,
+				BB33CC44DD55EE66FF77AA88 /* BackendServiceManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9944AA33BB22DD11EE00FF00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8BEB8E7CD08F4F5EA00ABBB9 /* VoxtralMenuBar */;
+			targetProxy = 1122BB33CC44DD55EE66FF77 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		E7D17D65CA29425285CEC421 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		A78FB95040384F0EBAEECAA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		DDCDDF1828EE407D9560F95D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = VoxtralMenuBar/VoxtralMenuBar.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = VoxtralMenuBar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar;
+				PRODUCT_NAME = VoxtralMenuBar;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = -Onone;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		2183133A92744F8C8AD2C56F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = VoxtralMenuBar/VoxtralMenuBar.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = VoxtralMenuBar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar;
+				PRODUCT_NAME = VoxtralMenuBar;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = -O;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		4477AA33BB22DD11EE00FF88 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar.tests;
+				PRODUCT_NAME = VoxtralMenuBarTests;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = -Onone;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoxtralMenuBar.app/Contents/MacOS/VoxtralMenuBar";
+			};
+			name = Debug;
+		};
+		5566AA44BB33EE22DD11AA99 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar.tests;
+				PRODUCT_NAME = VoxtralMenuBarTests;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = -O;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoxtralMenuBar.app/Contents/MacOS/VoxtralMenuBar";
+			};
+			name = Release;
+		};
+/* End PBXBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D655C9EF0AD348509B6D6B84 /* Build configuration list for PBXProject "VoxtralMenuBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7D17D65CA29425285CEC421 /* Debug */,
+				A78FB95040384F0EBAEECAA0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1C335DD7B7E2415BA378C498 /* Build configuration list for PBXNativeTarget "VoxtralMenuBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDCDDF1828EE407D9560F95D /* Debug */,
+				2183133A92744F8C8AD2C56F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5544AA33BB22CC11DD00FF99 /* Build configuration list for PBXNativeTarget "VoxtralMenuBarTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4477AA33BB22DD11EE00FF88 /* Debug */,
+				5566AA44BB33EE22DD11AA99 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C3D047872DAF4D28929D5585 /* Project object */;
+}

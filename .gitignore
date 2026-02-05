@@ -1,0 +1,15 @@
+# Python standalone runtime cache (downloaded during build)
+.python-standalone-cache/
+
+# macOS
+.DS_Store
+
+# Xcode
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+DerivedData/
+
+# Build artifacts
+build/
+*.app
+*.dmg
