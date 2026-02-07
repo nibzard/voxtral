@@ -724,11 +724,25 @@ async def handle_connection(
         logger.error(f"Connection error: {e}", exc_info=True)
     finally:
         if processing_task:
-            processing_task.cancel()
-            try:
-                await processing_task
-            except asyncio.CancelledError:
-                pass
+            if processing_task.done():
+                try:
+                    processing_task.result()
+                except Exception as e:
+                    logger.warning(
+                        f"Processing task ended with error during cleanup: {e}",
+                        exc_info=True,
+                    )
+            else:
+                processing_task.cancel()
+                try:
+                    await processing_task
+                except asyncio.CancelledError:
+                    pass
+                except Exception as e:
+                    logger.warning(
+                        f"Processing task raised during cancellation: {e}",
+                        exc_info=True,
+                    )
 
         logger.info(f"Connection handler ended for {client_addr}")
 
