@@ -299,7 +299,8 @@ final class OutputWriterTests: XCTestCase {
             startMs: 5000,
             endMs: 6000,
             text: "Final transcript text",
-            isFinal: true
+            isFinal: true,
+            confidence: nil
         )
 
         writer.appendTranscript(message)
@@ -318,7 +319,8 @@ final class OutputWriterTests: XCTestCase {
             startMs: 1000,
             endMs: 1500,
             text: "Partial text",
-            isFinal: false
+            isFinal: false,
+            confidence: nil
         )
 
         writer.appendTranscript(partialMessage)
@@ -341,7 +343,8 @@ final class OutputWriterTests: XCTestCase {
             startMs: 1000,
             endMs: 1500,
             text: "Partial text",
-            isFinal: false
+            isFinal: false,
+            confidence: nil
         )
 
         writer.appendTranscript(partialMessage, includePartial: true)
@@ -389,9 +392,9 @@ final class OutputWriterTests: XCTestCase {
 
         // Simulate a transcript session
         let messages = [
-            TranscriptionClient.TranscriptMessage(seq: 1, startMs: 0, endMs: 500, text: "Hello", isFinal: true),
-            TranscriptionClient.TranscriptMessage(seq: 2, startMs: 500, endMs: 1500, text: "world", isFinal: true),
-            TranscriptionClient.TranscriptMessage(seq: 3, startMs: 1500, endMs: 2500, text: "this is a test", isFinal: true),
+            TranscriptionClient.TranscriptMessage(seq: 1, startMs: 0, endMs: 500, text: "Hello", isFinal: true, confidence: nil),
+            TranscriptionClient.TranscriptMessage(seq: 2, startMs: 500, endMs: 1500, text: "world", isFinal: true, confidence: nil),
+            TranscriptionClient.TranscriptMessage(seq: 3, startMs: 1500, endMs: 2500, text: "this is a test", isFinal: true, confidence: nil),
         ]
 
         for message in messages {

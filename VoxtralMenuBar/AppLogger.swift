@@ -54,7 +54,7 @@ final class AppLogger {
 
     // Recording events
     func logRecordingStart(outputFile: String) {
-        logInfo("Recording started, output: \(outputFile.lastPathComponent)")
+        logInfo("Recording started, output: \(lastPathComponent(outputFile))")
     }
 
     func logRecordingStop(duration: TimeInterval) {
@@ -113,15 +113,15 @@ final class AppLogger {
 
     // File I/O events
     func logFileCreated(path: String) {
-        logInfo("Output file created: \(path.lastPathComponent)")
+        logInfo("Output file created: \(lastPathComponent(path))")
     }
 
     func logFileWriteError(path: String, error: Error) {
-        logError("File write error: \(path.lastPathComponent) - \(error.localizedDescription)")
+        logError("File write error: \(lastPathComponent(path)) - \(error.localizedDescription)")
     }
 
     func logFileClosed(path: String) {
-        logInfo("Output file closed: \(path.lastPathComponent)")
+        logInfo("Output file closed: \(lastPathComponent(path))")
     }
 
     // Model events
@@ -177,11 +177,11 @@ final class AppLogger {
     }
 
     func logOutputFolderAccessGranted(folder: String) {
-        logInfo("Output folder access granted: \(folder.lastPathComponent)")
+        logInfo("Output folder access granted: \(lastPathComponent(folder))")
     }
 
     func logOutputFolderAccessDenied(folder: String) {
-        logWarning("Output folder access denied: \(folder.lastPathComponent)")
+        logWarning("Output folder access denied: \(lastPathComponent(folder))")
     }
 
     // Error logging
@@ -199,5 +199,9 @@ final class AppLogger {
 
     func logDebug(_ message: String) {
         os_log("%{public}@", log: log, type: .debug, message)
+    }
+
+    private func lastPathComponent(_ path: String) -> String {
+        URL(fileURLWithPath: path).lastPathComponent
     }
 }

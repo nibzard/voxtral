@@ -16,11 +16,15 @@ final class BackendServiceManager: ObservableObject {
         var bundleSubdirectory: String = "backend"
         var appSupportFolderName: String = "Voxtral"
         var backendFolderName: String = "backend"
+        var bundleIDFileName: String = "backend-bundle-id.txt"
         var defaultPort: Int = 8765
         var maxRestartAttempts: Int = 5
         var baseRetryDelay: TimeInterval = 1.0
         var maxRetryDelay: TimeInterval = 30.0
         var terminationTimeout: TimeInterval = 2.0
+        // If the backend survives at least this long, treat it as a "good" run and reset
+        // restart attempts so later crashes get a fresh retry budget.
+        var stableUptimeToResetRestartAttempts: TimeInterval = 10.0
     }
 
     enum BackendServiceError: Error {
@@ -35,6 +39,9 @@ final class BackendServiceManager: ObservableObject {
     private var restartAttempts = 0
     private var shouldKeepRunning = false
     private var modelPath: String?
+    private var modelName: String?
+    private var modelBackend: String?
+    private var processStartUptime: TimeInterval?
 
     @Published private(set) var state: State = .idle
 
@@ -51,13 +58,18 @@ final class BackendServiceManager: ObservableObject {
             guard let self else { return }
             AppLogger.shared.logBackendStart()
             self.shouldKeepRunning = true
+            self.restartAttempts = 0
+            self.restartWorkItem?.cancel()
+            self.restartWorkItem = nil
             self.startIfNeeded()
         }
     }
 
-    func setModelPath(_ path: String?) {
+    func configureModel(modelPath: String?, modelName: String?, backend: String?) {
         queue.async { [weak self] in
-            self?.modelPath = path
+            self?.modelPath = modelPath
+            self?.modelName = modelName
+            self?.modelBackend = backend
         }
     }
 
@@ -85,14 +97,12 @@ final class BackendServiceManager: ObservableObject {
         do {
             let executableURL = try prepareBackendExecutable(forceCopy: false)
             try runProcess(at: executableURL)
-            restartAttempts = 0
             setState(.running)
             AppLogger.shared.logBackendStarted()
         } catch {
             do {
                 let executableURL = try prepareBackendExecutable(forceCopy: true)
                 try runProcess(at: executableURL)
-                restartAttempts = 0
                 setState(.running)
                 AppLogger.shared.logBackendStarted()
             } catch {
@@ -110,6 +120,7 @@ final class BackendServiceManager: ObservableObject {
         }
         try process.run()
         self.process = process
+        self.processStartUptime = ProcessInfo.processInfo.systemUptime
     }
 
     private func handleTermination(of terminatedProcess: Process) {
@@ -117,7 +128,16 @@ final class BackendServiceManager: ObservableObject {
             guard let self else { return }
             guard self.process === terminatedProcess else { return }
             AppLogger.shared.logBackendTerminated(exitCode: Int(terminatedProcess.terminationStatus))
+
+            if let startedAt = self.processStartUptime {
+                let lifetime = max(0, ProcessInfo.processInfo.systemUptime - startedAt)
+                if lifetime >= self.configuration.stableUptimeToResetRestartAttempts {
+                    self.restartAttempts = 0
+                }
+            }
+
             self.process = nil
+            self.processStartUptime = nil
 
             if self.shouldKeepRunning {
                 self.scheduleRestart()
@@ -146,6 +166,7 @@ final class BackendServiceManager: ObservableObject {
             queue.asyncAfter(deadline: .now() + configuration.terminationTimeout, execute: workItem)
         }
         self.process = nil
+        self.processStartUptime = nil
     }
 
     private func scheduleRestart() {
@@ -189,16 +210,105 @@ final class BackendServiceManager: ObservableObject {
         var isDirectory: ObjCBool = false
         let hasPythonRuntime = fileManager.fileExists(atPath: pythonRuntimeURL.path, isDirectory: &isDirectory)
             && isDirectory.boolValue
+        let pythonShimURL = pythonRuntimeURL.appendingPathComponent("bin/python3")
+
+        let bundleBackendDirectory = bundledBackendDirectoryURL()
+        let bundleID = bundleBackendDirectory.flatMap { backendBundleID(in: $0) }
+        let installedID = backendBundleID(in: backendDirectory)
+        let isBundleIDMismatch = shouldReplaceInstalledBackend(
+            installedDirectory: backendDirectory,
+            bundledDirectory: bundleBackendDirectory,
+            installedID: installedID,
+            bundleID: bundleID
+        )
 
         let needsCopy = forceCopy
             || !fileManager.isExecutableFile(atPath: destinationURL.path)
             || !hasPythonRuntime
+            || shouldReplacePythonShim(at: pythonShimURL)
+            || isBundleIDMismatch
 
         if needsCopy {
             try installBackendExecutable(at: destinationURL)
         }
 
         return destinationURL
+    }
+
+    private enum BackendInstallKind: Int {
+        case unknown = 0
+        case shim = 1
+        case full = 2
+    }
+
+    private func backendInstallKind(in directory: URL) -> BackendInstallKind {
+        let runtimeURL = directory.appendingPathComponent("python-runtime", isDirectory: true)
+
+        // "Full" bundle marker: python-build-standalone layout includes lib/pythonX.Y/site-packages.
+        // We check for a required dependency folder to avoid accidental false positives.
+        let fullMarker = runtimeURL
+            .appendingPathComponent("lib/python3.12/site-packages/websockets", isDirectory: true)
+        if FileManager.default.fileExists(atPath: fullMarker.path) {
+            return .full
+        }
+
+        // Shim marker: at least a python entrypoint exists.
+        let shimMarker = runtimeURL.appendingPathComponent("bin/python3")
+        if FileManager.default.fileExists(atPath: shimMarker.path) {
+            return .shim
+        }
+
+        return .unknown
+    }
+
+    private func shouldReplaceInstalledBackend(
+        installedDirectory: URL,
+        bundledDirectory: URL?,
+        installedID: String?,
+        bundleID: String?
+    ) -> Bool {
+        guard let bundledDirectory else { return false }
+        guard let bundleID else { return false }
+
+        // Bundle IDs match: keep installed backend.
+        if bundleID == installedID {
+            return false
+        }
+
+        // Avoid "downgrading" a fully bundled backend to the debug shim.
+        //
+        // This matters in local development: once you build a fully bundled backend (VOXTRAL_BUNDLE_BACKEND=1),
+        // launching a normal Debug build (which uses the lightweight shim) should keep the working backend
+        // instead of overwriting it with a shim that lacks dependencies.
+        let installedKind = backendInstallKind(in: installedDirectory)
+        let bundledKind = backendInstallKind(in: bundledDirectory)
+        if installedKind == .full && bundledKind == .shim {
+            return false
+        }
+
+        // Otherwise, refresh to match the bundle (upgrade shim->full, update full->full, etc).
+        return true
+    }
+
+    private func backendBundleID(in directory: URL) -> String? {
+        let url = directory.appendingPathComponent(configuration.bundleIDFileName)
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func shouldReplacePythonShim(at url: URL) -> Bool {
+        // Older Debug builds wrote a python shim that used `/usr/bin/env python3.12`, which frequently
+        // fails for GUI-launched apps/tests because PATH does not include Homebrew.
+        //
+        // If we detect that legacy shim, refresh the backend folder from the current app bundle.
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return false }
+        defer { try? handle.close() }
+
+        let prefix = (try? handle.read(upToCount: 256)) ?? Data()
+        guard !prefix.isEmpty else { return false }
+        guard let text = String(data: prefix, encoding: .utf8) else { return false }
+        return text.contains("/usr/bin/env") && (text.contains("python3.12") || text.contains("python3"))
     }
 
     private func backendDirectoryURL() throws -> URL {
@@ -220,6 +330,27 @@ final class BackendServiceManager: ObservableObject {
 
         try fileManager.createDirectory(at: backendFolderURL, withIntermediateDirectories: true)
         return backendFolderURL
+    }
+
+    private func huggingFaceHomeURL() -> URL? {
+        let fileManager = FileManager.default
+        guard let appSupportURL = try? fileManager.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        ) else {
+            return nil
+        }
+
+        let appFolderURL = appSupportURL.appendingPathComponent(
+            configuration.appSupportFolderName,
+            isDirectory: true
+        )
+
+        let hfURL = appFolderURL.appendingPathComponent("hf", isDirectory: true)
+        try? fileManager.createDirectory(at: hfURL, withIntermediateDirectories: true)
+        return hfURL
     }
 
     private func installBackendExecutable(at destinationURL: URL) throws {
@@ -268,15 +399,32 @@ final class BackendServiceManager: ObservableObject {
             environment["VOXTRAL_PORT"] = "\(configuration.defaultPort)"
         }
 
+        // Hugging Face cache root (used by faster-whisper and any other HF downloads).
+        if environment["HF_HOME"] == nil, let hfURL = huggingFaceHomeURL() {
+            environment["HF_HOME"] = hfURL.path
+            environment["TOKENIZERS_PARALLELISM"] = "false"
+            environment["HF_HUB_DISABLE_TELEMETRY"] = "1"
+        }
+
+        // Backend selection
+        if environment["VOXTRAL_BACKEND"] == nil, let modelBackend {
+            environment["VOXTRAL_BACKEND"] = modelBackend
+        }
+
         // Model configuration - opinionated defaults for Voxtral-Mini-4B-Realtime-2602
         if environment["VOXTRAL_MODEL_PATH"] == nil, let modelPath {
             environment["VOXTRAL_MODEL_PATH"] = modelPath
         }
         if environment["VOXTRAL_MODEL_NAME"] == nil {
-            environment["VOXTRAL_MODEL_NAME"] = modelPath ?? "mistralai/Voxtral-Mini-4B-Realtime-2602"
+            if let modelName {
+                environment["VOXTRAL_MODEL_NAME"] = modelName
+            } else {
+                environment["VOXTRAL_MODEL_NAME"] = modelPath ?? "mistralai/Voxtral-Mini-4B-Realtime-2602"
+            }
         }
         if environment["VOXTRAL_DTYPE"] == nil {
-            environment["VOXTRAL_DTYPE"] = "bf16"
+            // vLLM uses strings like "bfloat16"/"float16" (not "bf16"/"f16").
+            environment["VOXTRAL_DTYPE"] = "bfloat16"
         }
         if environment["VOXTRAL_TEMPERATURE"] == nil {
             environment["VOXTRAL_TEMPERATURE"] = "0.0"

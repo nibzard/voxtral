@@ -4,6 +4,69 @@ import CryptoKit
 final class ModelAssetManager: NSObject {
     static let shared = ModelAssetManager()
 
+    enum BackendKind: String, Codable {
+        case voxtral = "voxtral"
+        case whisper = "whisper"
+    }
+
+    enum ModelChoice: String, CaseIterable, Identifiable, Codable {
+        case fasterWhisperTiny = "Systran/faster-whisper-tiny"
+        case fasterWhisperBase = "Systran/faster-whisper-base"
+        case fasterWhisperSmall = "Systran/faster-whisper-small"
+        case voxtralMini4BRealtime2602 = "mistralai/Voxtral-Mini-4B-Realtime-2602"
+
+        var id: String { rawValue }
+
+        var displayName: String {
+            switch self {
+            case .fasterWhisperTiny:
+                return "Whisper Tiny (faster-whisper)"
+            case .fasterWhisperBase:
+                return "Whisper Base (faster-whisper)"
+            case .fasterWhisperSmall:
+                return "Whisper Small (faster-whisper)"
+            case .voxtralMini4BRealtime2602:
+                return "Voxtral Mini 4B Realtime"
+            }
+        }
+
+        var backendKind: BackendKind {
+            switch self {
+            case .fasterWhisperTiny, .fasterWhisperBase, .fasterWhisperSmall:
+                return .whisper
+            case .voxtralMini4BRealtime2602:
+                return .voxtral
+            }
+        }
+
+        var requiresManagedDownload: Bool {
+            switch self {
+            case .voxtralMini4BRealtime2602:
+                return true
+            case .fasterWhisperTiny, .fasterWhisperBase, .fasterWhisperSmall:
+                return false
+            }
+        }
+
+        var estimatedDownloadBytes: Int64 {
+            // These are approximate. faster-whisper pulls a repo snapshot into the HF cache.
+            switch self {
+            case .fasterWhisperTiny:
+                return 80 * 1024 * 1024
+            case .fasterWhisperBase:
+                return 180 * 1024 * 1024
+            case .fasterWhisperSmall:
+                return 520 * 1024 * 1024
+            case .voxtralMini4BRealtime2602:
+                return 0
+            }
+        }
+
+        var defaultModelNameForBackend: String {
+            rawValue
+        }
+    }
+
     enum State {
         case unknown
         case checking
@@ -38,6 +101,8 @@ final class ModelAssetManager: NSObject {
         }
     }
 
+    private static let selectedModelDefaultsKey = "voxtral.selected_model"
+
     struct ModelImportError: Error, LocalizedError {
         enum Kind {
             case invalidDirectory
@@ -46,6 +111,7 @@ final class ModelAssetManager: NSObject {
             case missingModelFiles
             case checksumMismatch(expected: String, actual: String)
             case copyFailed(underlying: Error)
+            case insufficientDiskSpace(requiredBytes: Int64, availableBytes: Int64)
             case downloadFailed(underlying: Error)
         }
 
@@ -65,13 +131,55 @@ final class ModelAssetManager: NSObject {
                 return "Model verification failed. Checksum mismatch: expected \(expected), got \(actual)"
             case .copyFailed(let underlying):
                 return "Failed to copy model files: \(underlying.localizedDescription)"
+            case .insufficientDiskSpace(let requiredBytes, let availableBytes):
+                let formatter = ByteCountFormatter()
+                formatter.countStyle = .file
+                let required = formatter.string(fromByteCount: requiredBytes)
+                let available = formatter.string(fromByteCount: availableBytes)
+                return "Not enough disk space to download the model. Need \(required) free, but only \(available) is available."
             case .downloadFailed(let underlying):
-                return "Failed to download model: \(underlying.localizedDescription)"
+                let message = Self.userFacingDownloadErrorMessage(for: underlying)
+                return "Failed to download model: \(message)"
             }
         }
 
         init(_ kind: Kind) {
             self.kind = kind
+        }
+
+        private static func userFacingDownloadErrorMessage(for error: Error) -> String {
+            // Most failures here are URLSession/CFNetwork errors which otherwise surface as an unreadable
+            // userInfo dump in `localizedDescription` (e.g. CFNetworkDownload_* keys). Prefer a short,
+            // actionable message.
+            if let urlError = error as? URLError {
+                switch urlError.code {
+                case .notConnectedToInternet:
+                    return "No internet connection."
+                case .timedOut:
+                    return "The download timed out."
+                case .networkConnectionLost:
+                    return "Network connection was lost."
+                case .cannotFindHost:
+                    return "Cannot find the download host."
+                case .cannotConnectToHost:
+                    return "Cannot connect to the download host."
+                case .secureConnectionFailed:
+                    return "Secure connection failed."
+                case .cannotWriteToFile, .cannotCreateFile:
+                    return "Cannot write the downloaded file. Check disk space and permissions."
+                case .cancelled:
+                    return "Download was cancelled."
+                default:
+                    return urlError.localizedDescription
+                }
+            }
+
+            let nsError = error as NSError
+            if nsError.domain == NSPOSIXErrorDomain && nsError.code == 28 {
+                return "No space left on device."
+            }
+
+            return error.localizedDescription
         }
     }
 
@@ -87,6 +195,7 @@ final class ModelAssetManager: NSObject {
     private var currentArchive: ModelArchive?
     private var lastReportedProgress: Double = 0
     private var stateChangeHandlers: [UUID: (State) -> Void] = [:]
+    private var selectedModelChoice: ModelChoice
     private var currentState: State = .unknown {
         didSet {
             notifyStateChange(currentState)
@@ -110,6 +219,10 @@ final class ModelAssetManager: NSObject {
         return appFolderURL.appendingPathComponent(configuration.modelsFolderName, isDirectory: true)
     }
 
+    var defaultModelDirectoryURL: URL {
+        modelDirectoryURL.appendingPathComponent(selectedModelInfo.modelIdentifier, isDirectory: true)
+    }
+
     var isReady: Bool {
         queue.sync {
             if case .ready = currentState {
@@ -122,43 +235,59 @@ final class ModelAssetManager: NSObject {
     struct Configuration {
         var appSupportFolderName: String = "Voxtral"
         var modelsFolderName: String = "models"
-        var downloadTimeout: TimeInterval = 300.0
+        // Large model downloads can take a long time (several GB).
+        var downloadTimeout: TimeInterval = 6 * 60 * 60
     }
-
-    // Default model: Voxtral-Mini-4B-Realtime-2602 (Hugging Face)
-    private let defaultModelInfo = ModelInfo(
-        name: "Voxtral-Mini-4B-Realtime-2602",
-        version: "2602",
-        files: [
-            ModelFile(
-                fileName: "consolidated.safetensors",
-                downloadURL: URL(string: "https://huggingface.co/mistralai/Voxtral-Mini-4B-Realtime-2602/resolve/main/consolidated.safetensors")!,
-                sha256: "263f178fe752c90a2ae58f037a95ed092db8b14768b0978b8c48f66979c8345d",
-                fileSize: 8_859_462_744
-            ),
-            ModelFile(
-                fileName: "params.json",
-                downloadURL: URL(string: "https://huggingface.co/mistralai/Voxtral-Mini-4B-Realtime-2602/resolve/main/params.json")!,
-                sha256: "2ace010ebf7f0b62c60747d91c6d140e3c7238632d3e9c63d60a2bd2065ea301",
-                fileSize: 1_343
-            ),
-            ModelFile(
-                fileName: "tekken.json",
-                downloadURL: URL(string: "https://huggingface.co/mistralai/Voxtral-Mini-4B-Realtime-2602/resolve/main/tekken.json")!,
-                sha256: "8434af1d39eba99f0ef46cf1450bf1a63fa941a26933a1ef5dbbf4adf0d00e44",
-                fileSize: 14_910_348
-            )
-        ],
-        archive: nil
-    )
 
     init(configuration: Configuration = Configuration()) {
         self.configuration = configuration
+        self.selectedModelChoice = Self.loadInitialSelectedModelChoice(configuration: configuration)
         super.init()
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = configuration.downloadTimeout
         config.timeoutIntervalForResource = configuration.downloadTimeout
+        config.waitsForConnectivity = true
         self.session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+    }
+
+    var selectedModel: ModelChoice {
+        queue.sync { selectedModelChoice }
+    }
+
+    func setSelectedModel(_ choice: ModelChoice, autoDownload: Bool = true) {
+        queue.async { [weak self] in
+            guard let self else { return }
+            guard choice != self.selectedModelChoice else { return }
+
+            UserDefaults.standard.set(choice.rawValue, forKey: Self.selectedModelDefaultsKey)
+            self.selectedModelChoice = choice
+
+            // Cancel any in-flight download and re-check for the new model.
+            if let task = self.downloadTask {
+                self.downloadTask = nil
+                task.cancel()
+            }
+            self.cleanupStagingLocked()
+            self.resetDownloadState()
+            self.currentState = .unknown
+            self.checkModelAvailability(autoDownload: autoDownload)
+        }
+    }
+
+    func selectedModelBackendKind() -> BackendKind {
+        queue.sync { selectedModelChoice.backendKind }
+    }
+
+    func selectedModelNameForBackend() -> String {
+        queue.sync { selectedModelChoice.defaultModelNameForBackend }
+    }
+
+    func expectedDownloadBytes(for choice: ModelChoice) -> Int64 {
+        if !choice.requiresManagedDownload {
+            return choice.estimatedDownloadBytes
+        }
+        let info = modelInfo(for: choice)
+        return info.archive?.fileSize ?? info.files.reduce(0) { $0 + $1.fileSize }
     }
 
     func checkModelAvailability(autoDownload: Bool = true) {
@@ -167,12 +296,21 @@ final class ModelAssetManager: NSObject {
             AppLogger.shared.logModelCheckStarted()
             self.currentState = .checking
 
+            // faster-whisper models are downloaded on-demand by the backend into the Hugging Face cache.
+            // Treat these as "ready" from the app's perspective.
+            if !self.selectedModelChoice.requiresManagedDownload {
+                self.currentState = .ready
+                AppLogger.shared.logModelFound()
+                return
+            }
+
             let fileManager = FileManager.default
-            let modelURL = self.modelDirectoryURL.appendingPathComponent(self.defaultModelInfo.modelIdentifier)
+            let info = self.selectedModelInfo
+            let modelURL = self.modelDirectoryURL.appendingPathComponent(info.modelIdentifier)
 
             if fileManager.fileExists(atPath: modelURL.path) {
                 do {
-                    try self.verifyModel(at: modelURL)
+                    try self.verifyModel(at: modelURL, modelInfo: info)
                     self.currentState = .ready
                     AppLogger.shared.logModelFound()
                 } catch {
@@ -201,6 +339,35 @@ final class ModelAssetManager: NSObject {
         }
     }
 
+    func resetModel(deleteInstalledModel: Bool = true) {
+        queue.async { [weak self] in
+            guard let self else { return }
+
+            if !self.selectedModelChoice.requiresManagedDownload {
+                self.currentState = .ready
+                return
+            }
+
+            if let task = self.downloadTask {
+                self.downloadTask = nil
+                task.cancel()
+            }
+
+            self.cleanupStagingLocked()
+            self.resetDownloadState()
+
+            if deleteInstalledModel {
+                let fileManager = FileManager.default
+                let url = self.defaultModelDirectoryURL
+                if fileManager.fileExists(atPath: url.path) {
+                    try? fileManager.removeItem(at: url)
+                }
+            }
+
+            self.currentState = .missing
+        }
+    }
+
     func importModel(from sourceURL: URL) {
         queue.async { [weak self] in
             guard let self else { return }
@@ -213,7 +380,7 @@ final class ModelAssetManager: NSObject {
             }
 
             do {
-                let destinationURL = self.modelDirectoryURL.appendingPathComponent(self.defaultModelInfo.modelIdentifier)
+                let destinationURL = self.modelDirectoryURL.appendingPathComponent(self.selectedModelInfo.modelIdentifier)
 
                 if sourceURL.hasDirectoryPath {
                     try self.installModel(from: sourceURL, to: destinationURL)
@@ -249,19 +416,58 @@ final class ModelAssetManager: NSObject {
         var result: String?
         queue.sync {
             guard case .ready = currentState else { return }
-            let modelURL = modelDirectoryURL.appendingPathComponent(defaultModelInfo.modelIdentifier)
-            result = modelURL.path
+            let info = selectedModelInfo
+            let modelURL = modelDirectoryURL.appendingPathComponent(info.modelIdentifier)
+            switch selectedModelChoice {
+            case .voxtralMini4BRealtime2602:
+                result = modelURL.path
+            case .fasterWhisperTiny, .fasterWhisperBase, .fasterWhisperSmall:
+                // faster-whisper models are managed via the Hugging Face cache; we only pass VOXTRAL_MODEL_NAME.
+                result = nil
+            }
         }
         return result
+    }
+
+    private var selectedModelInfo: ModelInfo {
+        modelInfo(for: selectedModelChoice)
+    }
+
+    private func modelInfo(for choice: ModelChoice) -> ModelInfo {
+        Self.modelInfos[choice] ?? Self.voxtralModelInfo
     }
 
     private func startDownloadLocked() {
         guard downloadTask == nil else { return }
         resetDownloadState()
 
+        do {
+            // Ensure the destination parent folder exists so users can open it in Finder
+            // (and so our final move doesn't fail due to a missing directory).
+            try FileManager.default.createDirectory(at: modelDirectoryURL, withIntermediateDirectories: true)
+        } catch {
+            self.currentState = .failed(error)
+            return
+        }
+
+        // Preflight disk space before starting the download. URLSession tends to surface failures here as
+        // cryptic CFNetworkDownload_* errors once the file is nearly complete.
+        let info = selectedModelInfo
+        let expectedBytes: Int64 = info.archive?.fileSize
+            ?? info.files.reduce(0) { $0 + $1.fileSize }
+        let safetyBytes = max(Int64(200 * 1024 * 1024), Int64(Double(expectedBytes) * 0.02))
+        let requiredBytes = expectedBytes + safetyBytes
+        if let availableBytes = availableDiskSpaceBytes(), availableBytes < requiredBytes {
+            self.currentState = .failed(ModelImportError(.insufficientDiskSpace(
+                requiredBytes: requiredBytes,
+                availableBytes: availableBytes
+            )))
+            return
+        }
+
         let stagingRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("voxtral-model-\(UUID().uuidString)")
-            .appendingPathComponent(defaultModelInfo.modelIdentifier)
+            .appendingPathComponent(info.modelIdentifier)
 
         do {
             try FileManager.default.createDirectory(at: stagingRoot, withIntermediateDirectories: true)
@@ -274,7 +480,7 @@ final class ModelAssetManager: NSObject {
         completedBytes = 0
         lastReportedProgress = 0
 
-        if let archive = defaultModelInfo.archive {
+        if let archive = info.archive {
             currentArchive = archive
             totalExpectedBytes = archive.fileSize
             currentState = .downloading(progress: 0.0)
@@ -284,7 +490,7 @@ final class ModelAssetManager: NSObject {
             return
         }
 
-        downloadQueue = defaultModelInfo.files
+        downloadQueue = info.files
         totalExpectedBytes = downloadQueue.reduce(0) { $0 + $1.fileSize }
         currentState = .downloading(progress: 0.0)
         startNextDownloadLocked()
@@ -313,9 +519,14 @@ final class ModelAssetManager: NSObject {
 
         currentState = .verifying
 
+        defer {
+            cleanupStagingLocked()
+            resetDownloadState()
+        }
+
         do {
-            let destinationURL = modelDirectoryURL.appendingPathComponent(defaultModelInfo.modelIdentifier)
-            try installDownloadedModel(from: stagingRoot, to: destinationURL)
+            try installDownloadedModel(from: stagingRoot, to: defaultModelDirectoryURL)
+            try verifyModel(at: defaultModelDirectoryURL, modelInfo: selectedModelInfo)
             currentState = .ready
             AppLogger.shared.logModelDownloadCompleted()
         } catch {
@@ -386,7 +597,9 @@ extension ModelAssetManager: URLSessionDownloadDelegate {
         downloadTask: URLSessionDownloadTask,
         didFinishDownloadingTo location: URL
     ) {
-        queue.async { [weak self] in
+        // Important: URLSession deletes the file at `location` after this delegate method returns.
+        // We must move it synchronously before returning.
+        queue.sync { [weak self] in
             guard let self else { return }
             guard downloadTask == self.downloadTask else { return }
 
@@ -406,6 +619,8 @@ extension ModelAssetManager: URLSessionDownloadDelegate {
                 try self.handleFileDownloadFinished(at: location, file: file)
             } catch {
                 self.currentState = .failed(error)
+                self.cleanupStagingLocked()
+                self.resetDownloadState()
             }
         }
     }
@@ -422,6 +637,7 @@ extension ModelAssetManager: URLSessionDownloadDelegate {
             if let error = error {
                 AppLogger.shared.logModelDownloadError(error)
                 self.currentState = .failed(ModelImportError(.downloadFailed(underlying: error)))
+                self.cleanupStagingLocked()
                 self.resetDownloadState()
             }
         }
@@ -429,6 +645,49 @@ extension ModelAssetManager: URLSessionDownloadDelegate {
 }
 
 private extension ModelAssetManager {
+    func cleanupStagingLocked() {
+        guard let stagingRoot = downloadStagingURL else { return }
+
+        // stagingRoot ends with ".../voxtral-model-UUID/<modelIdentifier>"
+        // Remove the UUID folder to clean up everything for this download attempt.
+        let stagingContainer = stagingRoot.deletingLastPathComponent()
+        try? FileManager.default.removeItem(at: stagingContainer)
+    }
+
+    func availableDiskSpaceBytes() -> Int64? {
+        // Be conservative: the download is staged in `temporaryDirectory` and then moved into
+        // Application Support. If these end up on different volumes, we should respect the minimum.
+        let candidates: [URL] = [
+            FileManager.default.temporaryDirectory,
+            modelDirectoryURL
+        ]
+
+        let capacities = candidates.compactMap { volumeAvailableCapacityBytes(for: $0) }
+        return capacities.min()
+    }
+
+    func volumeAvailableCapacityBytes(for url: URL) -> Int64? {
+        do {
+            let values = try url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+            if let capacity = values.volumeAvailableCapacityForImportantUsage {
+                return Int64(capacity)
+            }
+        } catch {
+            // Fall back below.
+        }
+
+        do {
+            let values = try url.resourceValues(forKeys: [.volumeAvailableCapacityKey])
+            if let capacity = values.volumeAvailableCapacity {
+                return Int64(capacity)
+            }
+        } catch {
+            return nil
+        }
+
+        return nil
+    }
+
     func currentExpectedBytes() -> Int64 {
         if let archive = currentArchive {
             return archive.fileSize
@@ -437,7 +696,11 @@ private extension ModelAssetManager {
     }
 
     func verifyModel(at url: URL) throws {
-        for file in defaultModelInfo.files {
+        try verifyModel(at: url, modelInfo: selectedModelInfo)
+    }
+
+    func verifyModel(at url: URL, modelInfo: ModelInfo) throws {
+        for file in modelInfo.files {
             let fileURL = url.appendingPathComponent(file.fileName)
             guard FileManager.default.fileExists(atPath: fileURL.path) else {
                 throw ModelImportError(.missingModelFiles)
@@ -520,7 +783,7 @@ private extension ModelAssetManager {
 
             let archiveURL = try persistDownloadedArchive(from: location, archive: archive)
             let extractedURL = try extractArchiveIfNeeded(from: archiveURL)
-            let destinationURL = modelDirectoryURL.appendingPathComponent(defaultModelInfo.modelIdentifier)
+            let destinationURL = modelDirectoryURL.appendingPathComponent(selectedModelInfo.modelIdentifier)
             try installModel(from: extractedURL, to: destinationURL)
             currentState = .ready
             AppLogger.shared.logModelDownloadCompleted()
@@ -593,7 +856,7 @@ private extension ModelAssetManager {
         }
 
         let resolvedRoot = try resolveExtractedRoot(from: destinationRoot)
-        try verifyModel(at: resolvedRoot)
+        try verifyModel(at: resolvedRoot, modelInfo: selectedModelInfo)
 
         return resolvedRoot
     }
@@ -707,4 +970,66 @@ private extension ModelAssetManager {
         return hashes
     }
 
+    static let fasterWhisperTinyInfo = ModelInfo(
+        name: "faster-whisper-tiny",
+        version: "1",
+        files: [],
+        archive: nil
+    )
+
+    static let fasterWhisperBaseInfo = ModelInfo(
+        name: "faster-whisper-base",
+        version: "1",
+        files: [],
+        archive: nil
+    )
+
+    static let fasterWhisperSmallInfo = ModelInfo(
+        name: "faster-whisper-small",
+        version: "1",
+        files: [],
+        archive: nil
+    )
+
+    static let voxtralModelInfo = ModelInfo(
+        name: "Voxtral-Mini-4B-Realtime-2602",
+        version: "2602",
+        files: [
+            ModelFile(
+                fileName: "consolidated.safetensors",
+                downloadURL: URL(string: "https://huggingface.co/mistralai/Voxtral-Mini-4B-Realtime-2602/resolve/main/consolidated.safetensors")!,
+                sha256: "263f178fe752c90a2ae58f037a95ed092db8b14768b0978b8c48f66979c8345d",
+                fileSize: 8_859_462_744
+            ),
+            ModelFile(
+                fileName: "params.json",
+                downloadURL: URL(string: "https://huggingface.co/mistralai/Voxtral-Mini-4B-Realtime-2602/resolve/main/params.json")!,
+                sha256: "2ace010ebf7f0b62c60747d91c6d140e3c7238632d3e9c63d60a2bd2065ea301",
+                fileSize: 1_343
+            ),
+            ModelFile(
+                fileName: "tekken.json",
+                downloadURL: URL(string: "https://huggingface.co/mistralai/Voxtral-Mini-4B-Realtime-2602/resolve/main/tekken.json")!,
+                sha256: "8434af1d39eba99f0ef46cf1450bf1a63fa941a26933a1ef5dbbf4adf0d00e44",
+                fileSize: 14_910_348
+            )
+        ],
+        archive: nil
+    )
+
+    static let modelInfos: [ModelChoice: ModelInfo] = [
+        .fasterWhisperTiny: fasterWhisperTinyInfo,
+        .fasterWhisperBase: fasterWhisperBaseInfo,
+        .fasterWhisperSmall: fasterWhisperSmallInfo,
+        .voxtralMini4BRealtime2602: voxtralModelInfo,
+    ]
+
+    static func loadInitialSelectedModelChoice(configuration: Configuration) -> ModelChoice {
+        if let raw = UserDefaults.standard.string(forKey: selectedModelDefaultsKey),
+           let choice = ModelChoice(rawValue: raw) {
+            return choice
+        }
+        // Default to the smaller/friendlier option for Apple Silicon.
+        return .fasterWhisperBase
+    }
 }

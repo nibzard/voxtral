@@ -5,42 +5,44 @@
 	objectVersion = 56;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		FB6038E4DA8F4A2FA426E38E /* AudioCapturePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */; };
-		6A3D9F2B1C4E5D6F7A8B9C0D /* BackendServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B7E5C1A0D94A3E8C0B9E1A /* BackendServiceManager.swift */; };
-		9A1B2C3D4E5F6789ABCD0123 /* TranscriptionClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */; };
-		98D78B031D5B4720B4073869 /* OutputWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C042A1E6204A61B963B14A /* OutputWriter.swift */; };
-		3B8C7D4E9A2F5E1B4C6D8E3A /* ModelAssetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */; };
-		5F2BF866898F427EA900266E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */; };
+	/* Begin PBXBuildFile section */
+			FB6038E4DA8F4A2FA426E38E /* AudioCapturePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */; };
+			FEEDFACECAFEBEEF55667788 /* BackpressureDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEADBEEFCAFEBABE11223344 /* BackpressureDefaults.swift */; };
+				6A3D9F2B1C4E5D6F7A8B9C0D /* BackendServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B7E5C1A0D94A4E8C0B9E1A /* BackendServiceManager.swift */; };
+			9A1B2C3D4E5F6789ABCD0123 /* TranscriptionClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */; };
+			98D78B031D5B4720B4073869 /* OutputWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C042A1E6204A61B963B14A /* OutputWriter.swift */; };
+			3B8C7D4E9A2F5E1B4C6D8E3A /* ModelAssetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */; };
+			5F2BF866898F427EA900266E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */; };
 		6801CE5C1EF748B78C58E481 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4011287DC7244272BF18764C /* StatusBarController.swift */; };
 		14D05E95931E49959651F872 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7D2D7D75CED48A1A256C58E /* PopoverView.swift */; };
 		23A58245EF104A8FB5CEB866 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26A5414757A46078105C1FB /* main.swift */; };
 		1A2B3C4D5E6F7890ABCD1234 /* MenuBarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C2 /* MenuBarViewModel.swift */; };
 		7B3C8D5E1A2F4B6C9D0E8F3A /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D4E5F6B7C8D9E0F1A2B3C4 /* KeychainManager.swift */; };
-		8E5F6A7B2C3D4E5F6A7B8C9D0 /* GeminiRewriteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B3 /* GeminiRewriteService.swift */; };
-		4A5B6C7D8E9F0A1B2C3D4E5F /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A8B9C0D1E2F3A4 /* AppLogger.swift */; };
-		1426A4D030394A65A85DAC89 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 985208AAC4704C8CA15DF297 /* AppKit.framework */; };
-		094C3D74B9CF482497E35F89 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53885F96424B41A69556ED95 /* SwiftUI.framework */; };
-		C69674E739F046F1A5F3EA8C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CAC63FC5B654773AB21A134 /* Foundation.framework */; };
+			8E5F6A7B2C3D4E5F6A7B8C9D0 /* GeminiRewriteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B3 /* GeminiRewriteService.swift */; };
+			4A5B6C7D8E9F0A1B2C3D4E5F /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3C4D5E6F7A8B9C0D1E2F3A4 /* AppLogger.swift */; };
+			8B3CB9405F154ED09B0D60F2 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67CEC8CDDC62427FBCFEC8CA /* PreferencesView.swift */; };
+			D795118746184DA1A11951B2 /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8AE0B29C9964878AF7D756B /* PreferencesWindowController.swift */; };
+			1426A4D030394A65A85DAC89 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 985208AAC4704C8CA15DF297 /* AppKit.framework */; };
+			094C3D74B9CF482497E35F89 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53885F96424B41A69556ED95 /* SwiftUI.framework */; };
+			C69674E739F046F1A5F3EA8C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CAC63FC5B654773AB21A134 /* Foundation.framework */; };
 		AA11BB22CC33DD44EE55FF66 /* OutputWriterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11CC22DD33EE44FF55AA66 /* OutputWriterTests.swift */; };
 		FF22AA33BB44CC55DD66EE77 /* AudioCapturePipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA22BB33CC44DD55EE66FF77 /* AudioCapturePipelineTests.swift */; };
-		BB33CC44DD55EE66FF77AA88 /* BackendServiceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC44DD55EE66FF77AA88BB99 /* BackendServiceManagerTests.swift */; };
-		CC11DD22EE33FF44AA55BB77 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33AA44BB55CC88 /* XCTest.framework */; };
-		EE11FF22AA33BB44CC55DD99 /* VoxtralMenuBar.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF11AA22BB33CC44DD55EE00 /* VoxtralMenuBar.framework */; };
-		BKEND0001BUILD /* BundleBackend.sh in Sources */ = {isa = PBXBuildFile; fileRef = BKEND0001SCRIPT /* BundleBackend.sh */; settings = {ATTRIBUTES = (RunScript, ); }; };
-		8C185F8662FA4BB45F6174B9 /* backend-bundle in Copy Backend to Bundle */ = {isa = PBXBuildFile; fileRef = 554358D49E1D48E5A58D479D /* backend-bundle */; };
-/* End PBXBuildFile section */
+			BB33CC44DD55EE66FF77AA88 /* BackendServiceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC44DD55EE66FF77AA88BB99 /* BackendServiceManagerTests.swift */; };
+			CC11DD22EE33FF44AA55BB77 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD11EE22FF33AA44BB55CC88 /* XCTest.framework */; };
+			BKEND0001BUILD /* BundleBackend.sh in Sources */ = {isa = PBXBuildFile; fileRef = BKEND0001SCRIPT /* BundleBackend.sh */; settings = {ATTRIBUTES = (RunScript, ); }; };
+			8C185F8662FA4BB45F6174B9 /* backend-bundle in Copy Backend to Bundle */ = {isa = PBXBuildFile; fileRef = 554358D49E1D48E5A58D479D /* backend-bundle */; };
+	/* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		12F23AEFCD64C9A38ADAABDC /* Copy Backend to Bundle */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = backend;
-			dstSubfolderSpec = 0;
-			files = (
-				8C185F8662FA4BB45F6174B9 /* backend-bundle in Copy Backend to Bundle */,
-			);
-			name = "Copy Backend to Bundle";
+			12F23AEFCD64C9A38ADAABDC /* Copy Backend to Bundle */ = {
+				isa = PBXCopyFilesBuildPhase;
+				buildActionMask = 2147483647;
+				dstPath = "";
+				dstSubfolderSpec = 7;
+				files = (
+					8C185F8662FA4BB45F6174B9 /* backend-bundle in Copy Backend to Bundle */,
+				);
+				name = "Copy Backend to Bundle";
 			runOnlyForDeploymentPostprocessing = 0;
 			symbolicLinks = 0;
 		};
@@ -56,16 +58,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXFileReference section */
-		26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapturePipeline.swift; sourceTree = "<group>"; };
-		F2B7E5C1A0D94A4E8C0B9E1A /* BackendServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendServiceManager.swift; sourceTree = "<group>"; };
-		B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionClient.swift; sourceTree = "<group>"; };
-		32C042A1E6204A61B963B14A /* OutputWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputWriter.swift; sourceTree = "<group>"; };
-		E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelAssetManager.swift; sourceTree = "<group>"; };
-		3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4011287DC7244272BF18764C /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
-		C7D2D7D75CED48A1A256C58E /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
-		C26A5414757A46078105C1FB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+	/* Begin PBXFileReference section */
+				26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapturePipeline.swift; sourceTree = "<group>"; };
+				DEADBEEFCAFEBABE11223344 /* BackpressureDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackpressureDefaults.swift; sourceTree = "<group>"; };
+				F2B7E5C1A0D94A4E8C0B9E1A /* BackendServiceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendServiceManager.swift; sourceTree = "<group>"; };
+				B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionClient.swift; sourceTree = "<group>"; };
+				32C042A1E6204A61B963B14A /* OutputWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputWriter.swift; sourceTree = "<group>"; };
+				E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelAssetManager.swift; sourceTree = "<group>"; };
+			67CEC8CDDC62427FBCFEC8CA /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+			D8AE0B29C9964878AF7D756B /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
+			3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+			4011287DC7244272BF18764C /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+			C7D2D7D75CED48A1A256C58E /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+			C26A5414757A46078105C1FB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* MenuBarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarViewModel.swift; sourceTree = "<group>"; };
 		A1D4E5F6B7C8D9E0F1A2B3C4 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		C2D3E4F5A6B7C8D9E0F1A2B3 /* GeminiRewriteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiRewriteService.swift; sourceTree = "<group>"; };
@@ -81,11 +86,10 @@
 		BB11CC22DD33EE44FF55AA66 /* OutputWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputWriterTests.swift; sourceTree = "<group>"; };
 		AA22BB33CC44DD55EE66FF77 /* AudioCapturePipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapturePipelineTests.swift; sourceTree = "<group>"; };
 		CC44DD55EE66FF77AA88BB99 /* BackendServiceManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendServiceManagerTests.swift; sourceTree = "<group>"; };
-		DD11EE22FF33AA44BB55CC88 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
-		9988AA77BB66CC55DD44EE33 /* VoxtralMenuBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = VoxtralMenuBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		FF11AA22BB33CC44DD55EE00 /* VoxtralMenuBar.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = VoxtralMenuBar.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BKEND0001SCRIPT /* BundleBackend.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = BundleBackend.sh; sourceTree = "<group>"; };
-/* End PBXFileReference section */
+			DD11EE22FF33AA44BB55CC88 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+			9988AA77BB66CC55DD44EE33 /* VoxtralMenuBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = VoxtralMenuBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+			BKEND0001SCRIPT /* BundleBackend.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = BundleBackend.sh; sourceTree = "<group>"; };
+	/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		065D0ECB4BDB4628B10C38DA /* Frameworks */ = {
@@ -98,15 +102,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7766AA55BB44CC33DD22EE11 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CC11DD22EE33FF44AA55BB77 /* XCTest.framework in Frameworks */,
-				EE11FF22AA33BB44CC55DD99 /* VoxtralMenuBar.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+			7766AA55BB44CC33DD22EE11 /* Frameworks */ = {
+				isa = PBXFrameworksBuildPhase;
+				buildActionMask = 2147483647;
+				files = (
+					CC11DD22EE33FF44AA55BB77 /* XCTest.framework in Frameworks */,
+				);
+				runOnlyForDeploymentPostprocessing = 0;
+			};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -121,18 +124,21 @@
 			);
 			sourceTree = "<group>";
 		};
-		7B02ED1294A74B2DAA83CD2D /* VoxtralMenuBar */ = {
-			isa = PBXGroup;
-			children = (
-				26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */,
-				F2B7E5C1A0D94A3E8C0B9E1A /* BackendServiceManager.swift */,
-				B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */,
-				32C042A1E6204A61B963B14A /* OutputWriter.swift */,
-				E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */,
-				3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */,
-				4011287DC7244272BF18764C /* StatusBarController.swift */,
-				C7D2D7D75CED48A1A256C58E /* PopoverView.swift */,
-				C26A5414757A46078105C1FB /* main.swift */,
+				7B02ED1294A74B2DAA83CD2D /* VoxtralMenuBar */ = {
+					isa = PBXGroup;
+					children = (
+						26F86A61B0A443B698CF1B1B /* AudioCapturePipeline.swift */,
+						DEADBEEFCAFEBABE11223344 /* BackpressureDefaults.swift */,
+							F2B7E5C1A0D94A4E8C0B9E1A /* BackendServiceManager.swift */,
+						B6C5E5A1F2E34C8A9B0C1D2E /* TranscriptionClient.swift */,
+						32C042A1E6204A61B963B14A /* OutputWriter.swift */,
+						E9A4F2C6D8B1E3A5C7F9D4B2 /* ModelAssetManager.swift */,
+					67CEC8CDDC62427FBCFEC8CA /* PreferencesView.swift */,
+					D8AE0B29C9964878AF7D756B /* PreferencesWindowController.swift */,
+					3C3AD0B6D98F4FE4B8398811 /* AppDelegate.swift */,
+					4011287DC7244272BF18764C /* StatusBarController.swift */,
+					C7D2D7D75CED48A1A256C58E /* PopoverView.swift */,
+					C26A5414757A46078105C1FB /* main.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C2 /* MenuBarViewModel.swift */,
 				A1D4E5F6B7C8D9E0F1A2B3C4 /* KeychainManager.swift */,
 				C2D3E4F5A6B7C8D9E0F1A2B3 /* GeminiRewriteService.swift */,
@@ -269,16 +275,16 @@
 			);
 			inputFileListPaths = (
 			);
-			inputPaths = (
-				"$(SRCROOT)/../backend/pyproject.toml",
-				"$(SRCROOT)/VoxtralMenuBar/BundleBackend.sh",
-			);
+				inputPaths = (
+					"$(SRCROOT)/backend/pyproject.toml",
+					"$(SRCROOT)/VoxtralMenuBar/BundleBackend.sh",
+				);
 			outputFileListPaths = (
 			);
-			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/backend/voxtral-backend",
-				"$(BUILT_PRODUCTS_DIR)/backend/python-lib",
-			);
+				outputPaths = (
+					"$(BUILT_PRODUCTS_DIR)/backend/voxtral-backend",
+					"$(BUILT_PRODUCTS_DIR)/backend/python-runtime",
+				);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/VoxtralMenuBar/BundleBackend.sh\"";
@@ -286,20 +292,23 @@
 		};
 /* End PBXShellScriptBuildPhase section */
 
-/* Begin PBXSourcesBuildPhase section */
-		30B194374B0F486E8A8D08EC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				FB6038E4DA8F4A2FA426E38E /* AudioCapturePipeline.swift in Sources */,
-				6A3D9F2B1C4E5D6F7A8B9C0D /* BackendServiceManager.swift in Sources */,
-				9A1B2C3D4E5F6789ABCD0123 /* TranscriptionClient.swift in Sources */,
-				98D78B031D5B4720B4073869 /* OutputWriter.swift in Sources */,
-				3B8C7D4E9A2F5E1B4C6D8E3A /* ModelAssetManager.swift in Sources */,
-				5F2BF866898F427EA900266E /* AppDelegate.swift in Sources */,
-				6801CE5C1EF748B78C58E481 /* StatusBarController.swift in Sources */,
-				14D05E95931E49959651F872 /* PopoverView.swift in Sources */,
-				23A58245EF104A8FB5CEB866 /* main.swift in Sources */,
+	/* Begin PBXSourcesBuildPhase section */
+				30B194374B0F486E8A8D08EC /* Sources */ = {
+					isa = PBXSourcesBuildPhase;
+					buildActionMask = 2147483647;
+					files = (
+						FB6038E4DA8F4A2FA426E38E /* AudioCapturePipeline.swift in Sources */,
+						FEEDFACECAFEBEEF55667788 /* BackpressureDefaults.swift in Sources */,
+						6A3D9F2B1C4E5D6F7A8B9C0D /* BackendServiceManager.swift in Sources */,
+						9A1B2C3D4E5F6789ABCD0123 /* TranscriptionClient.swift in Sources */,
+						98D78B031D5B4720B4073869 /* OutputWriter.swift in Sources */,
+						3B8C7D4E9A2F5E1B4C6D8E3A /* ModelAssetManager.swift in Sources */,
+					8B3CB9405F154ED09B0D60F2 /* PreferencesView.swift in Sources */,
+					D795118746184DA1A11951B2 /* PreferencesWindowController.swift in Sources */,
+					5F2BF866898F427EA900266E /* AppDelegate.swift in Sources */,
+					6801CE5C1EF748B78C58E481 /* StatusBarController.swift in Sources */,
+					14D05E95931E49959651F872 /* PopoverView.swift in Sources */,
+					23A58245EF104A8FB5CEB866 /* main.swift in Sources */,
 				1A2B3C4D5E6F7890ABCD1234 /* MenuBarViewModel.swift in Sources */,
 				7B3C8D5E1A2F4B6C9D0E8F3A /* KeychainManager.swift in Sources */,
 				8E5F6A7B2C3D4E5F6A7B8C9D0 /* GeminiRewriteService.swift in Sources */,
@@ -346,17 +355,18 @@
 			};
 			name = Release;
 		};
-		DDCDDF1828EE407D9560F95D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = VoxtralMenuBar/VoxtralMenuBar.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_FILE = VoxtralMenuBar/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar;
+			DDCDDF1828EE407D9560F95D /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					CODE_SIGN_ENTITLEMENTS = VoxtralMenuBar/VoxtralMenuBar.entitlements;
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 1;
+					ENABLE_TESTABILITY = YES;
+					INFOPLIST_FILE = VoxtralMenuBar/Info.plist;
+					LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+					MACOSX_DEPLOYMENT_TARGET = 14.0;
+					MARKETING_VERSION = 0.1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar;
 				PRODUCT_NAME = VoxtralMenuBar;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = -Onone;
@@ -382,18 +392,19 @@
 			};
 			name = Release;
 		};
-		4477AA33BB22DD11EE00FF88 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+			4477AA33BB22DD11EE00FF88 /* Debug */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					BUNDLE_LOADER = "$(TEST_HOST)";
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 1;
+					DEVELOPMENT_TEAM = "";
+					GENERATE_INFOPLIST_FILE = YES;
+					GCC_PREPROCESSOR_DEFINITIONS = (
+						"DEBUG=1",
+						"$(inherited)",
+					);
+					MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar.tests;
 				PRODUCT_NAME = VoxtralMenuBarTests;
@@ -404,18 +415,19 @@
 			};
 			name = Debug;
 		};
-		5566AA44BB33EE22DD11AA99 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar.tests;
-				PRODUCT_NAME = VoxtralMenuBarTests;
-				SWIFT_COMPILATION_MODE = wholemodule;
+			5566AA44BB33EE22DD11AA99 /* Release */ = {
+				isa = XCBuildConfiguration;
+				buildSettings = {
+					BUNDLE_LOADER = "$(TEST_HOST)";
+					CODE_SIGN_STYLE = Automatic;
+					CURRENT_PROJECT_VERSION = 1;
+					DEVELOPMENT_TEAM = "";
+					GENERATE_INFOPLIST_FILE = YES;
+					MACOSX_DEPLOYMENT_TARGET = 14.0;
+					MARKETING_VERSION = 0.1.0;
+					PRODUCT_BUNDLE_IDENTIFIER = com.voxtral.menubar.tests;
+					PRODUCT_NAME = VoxtralMenuBarTests;
+					SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = -O;
 				SWIFT_VERSION = 5.9;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoxtralMenuBar.app/Contents/MacOS/VoxtralMenuBar";

@@ -21,19 +21,23 @@ classifiers = [
 ]
 
 dependencies = [
-    "fastapi>=0.104.0",
-    "uvicorn[standard]>=0.24.0",
     "websockets>=12.0",
-    "pydantic>=2.5.0",
-    "python-dotenv>=1.0.0",
-    "vllm>=0.6.0",
-    "vllm-metal>=0.1.0",
-    "mistral-common[audio]>=1.9.0",
-    "librosa>=0.10.0",
     "soxr>=0.3.6",
     "soundfile>=0.12.0",
     "numpy>=1.24.0",
-    "transformers>=4.40.0",
+]
+
+[project.optional-dependencies]
+# vLLM Metal backend (Voxtral model).
+voxtral = [
+    "vllm==0.14.1",
+    "vllm-metal==0.1.0",
+    "mistral-common[audio]>=1.9.0",
+]
+
+# faster-whisper backend (CTranslate2). Recommended for Apple Silicon CPU/Metal.
+whisper = [
+    "faster-whisper>=1.1.0",
 ]
 
 [project.scripts]

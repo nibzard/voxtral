@@ -17,7 +17,7 @@ enum AppError: LocalizedError {
     case backendLaunchFailed
     case backendNotReady
     case modelNotReady
-    case modelDownloadFailed(String)
+    case modelDownloadFailed(any Error)
     case outputFolderUnavailable
     case outputFolderAccessDenied
     case transcriptionFailed(String)
@@ -32,8 +32,8 @@ enum AppError: LocalizedError {
             return "The transcription service is initializing. Please wait."
         case .modelNotReady:
             return "The speech model is still downloading. Please wait."
-        case .modelDownloadFailed(let message):
-            return "Model download failed: \(message)"
+        case .modelDownloadFailed(let error):
+            return error.localizedDescription
         case .outputFolderUnavailable:
             return "Output folder is not available. Please select a different folder."
         case .outputFolderAccessDenied:
@@ -53,7 +53,17 @@ enum AppError: LocalizedError {
             return "Wait a moment and try recording again."
         case .modelNotReady:
             return "Wait for the model download to complete."
-        case .modelDownloadFailed:
+        case .modelDownloadFailed(let error):
+            if let modelError = error as? ModelAssetManager.ModelImportError {
+                switch modelError.kind {
+                case .insufficientDiskSpace:
+                    return "Free up disk space (models can be several GB) and retry the download."
+                case .checksumMismatch:
+                    return "The downloaded file was corrupted. Retry the download."
+                default:
+                    break
+                }
+            }
             return "Check your network connection and retry the download."
         case .outputFolderUnavailable, .outputFolderAccessDenied:
             return "Click Change to select a new output folder."
@@ -78,7 +88,6 @@ final class MenuBarViewModel: ObservableObject {
     @Published var currentError: AppError?
     @Published var hasGeminiAPIKey: Bool = false
     @Published var isRewriteEnabled: Bool = false
-    @Published var isShowingPreferences: Bool = false
     @Published var isRewriting: Bool = false
     @Published var geminiAPIKeyInput: String = ""
     @Published var currentLatencyMs: Double = 0
@@ -86,6 +95,7 @@ final class MenuBarViewModel: ObservableObject {
     @Published var modelStatusText: String = "Checking model..."
     @Published var modelDownloadProgress: Double? = nil
     @Published var isModelReady: Bool = false
+    @Published var selectedModel: ModelAssetManager.ModelChoice
     @ObservedObject private var backendServiceManager: BackendServiceManager
     private let modelAssetManager: ModelAssetManager
 
@@ -109,12 +119,28 @@ final class MenuBarViewModel: ObservableObject {
     private var modelStateToken: Any?
     private var isStopping = false
 
+    private var huggingFaceHomeURL: URL {
+        let fileManager = FileManager.default
+        let appSupportURL = (try? fileManager.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )) ?? fileManager.homeDirectoryForCurrentUser
+
+        let appFolderURL = appSupportURL.appendingPathComponent("Voxtral", isDirectory: true)
+        let hfURL = appFolderURL.appendingPathComponent("hf", isDirectory: true)
+        try? fileManager.createDirectory(at: hfURL, withIntermediateDirectories: true)
+        return hfURL
+    }
+
     init(
         backendServiceManager: BackendServiceManager = .shared,
         modelAssetManager: ModelAssetManager = .shared
     ) {
         self.backendServiceManager = backendServiceManager
         self.modelAssetManager = modelAssetManager
+        self.selectedModel = modelAssetManager.selectedModel
         self.keychainManager = KeychainManager()
         restoreOutputFolder()
         restoreGeminiSettings()
@@ -168,6 +194,35 @@ final class MenuBarViewModel: ObservableObject {
 
     var shouldShowModelStatus: Bool {
         !isModelReady || modelDownloadProgress != nil
+    }
+
+    var selectedModelDisplayName: String {
+        selectedModel.displayName
+    }
+
+    var selectedModelDownloadSizeText: String {
+        let bytes = modelAssetManager.expectedDownloadBytes(for: selectedModel)
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: bytes)
+    }
+
+    var modelDownloadPath: String {
+        switch selectedModel.backendKind {
+        case .voxtral:
+            return modelAssetManager.defaultModelDirectoryURL.path
+        case .whisper:
+            return huggingFaceHomeURL.path
+        }
+    }
+
+    var modelStorageRootPath: String {
+        switch selectedModel.backendKind {
+        case .voxtral:
+            return modelAssetManager.modelDirectoryURL.path
+        case .whisper:
+            return huggingFaceHomeURL.path
+        }
     }
 
     func toggleRecording() {
@@ -258,7 +313,8 @@ final class MenuBarViewModel: ObservableObject {
         setupBackpressureCallbacks()
         startLatencyUpdates()
 
-        transcriptionClient?.startSession()
+        let delayMs: Int = (selectedModel.backendKind == .whisper) ? 1500 : 480
+        transcriptionClient?.startSession(configuration: .init(transcriptionDelayMs: delayMs))
 
         do {
             try audioCapturePipeline?.start(onFrames: { [weak self] frames in
@@ -454,6 +510,22 @@ final class MenuBarViewModel: ObservableObject {
         NSWorkspace.shared.open(url)
     }
 
+    func openModelFolder() {
+        if selectedModel.backendKind == .whisper {
+            NSWorkspace.shared.open(huggingFaceHomeURL)
+            return
+        }
+
+        let fileManager = FileManager.default
+        let modelURL = modelAssetManager.defaultModelDirectoryURL
+
+        if fileManager.fileExists(atPath: modelURL.path) {
+            NSWorkspace.shared.activateFileViewerSelecting([modelURL])
+        } else {
+            NSWorkspace.shared.open(modelAssetManager.modelDirectoryURL)
+        }
+    }
+
     func quitApp() {
         NSApp.terminate(nil)
     }
@@ -474,13 +546,29 @@ final class MenuBarViewModel: ObservableObject {
         modelAssetManager.downloadModel()
     }
 
+    func resetModel() {
+        clearErrorIfModelError()
+        if selectedModel.backendKind == .whisper {
+            resetWhisperCache()
+        } else {
+            modelAssetManager.resetModel(deleteInstalledModel: true)
+        }
+    }
+
+    func applySelectedModel(_ model: ModelAssetManager.ModelChoice) {
+        clearErrorIfModelError()
+        selectedModel = model
+        modelAssetManager.setSelectedModel(model, autoDownload: true)
+    }
+
     func saveGeminiAPIKey() {
-        guard !geminiAPIKeyInput.isEmpty else {
+        let trimmed = geminiAPIKeyInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
             return
         }
 
         do {
-            try keychainManager?.store(key: geminiAPIKeyKeychainKey, value: geminiAPIKeyInput)
+            try keychainManager?.store(key: geminiAPIKeyKeychainKey, value: trimmed)
             hasGeminiAPIKey = true
         } catch {
             hasGeminiAPIKey = false
@@ -574,26 +662,30 @@ private extension MenuBarViewModel {
         case .missing:
             isModelReady = false
             modelDownloadProgress = nil
-            modelStatusText = "Model missing. Preparing download..."
+            modelStatusText = "\(selectedModelDisplayName) missing. Click Retry Download."
         case .downloading(let progress):
             isModelReady = false
             modelDownloadProgress = progress
-            modelStatusText = "Downloading model \(Int(progress * 100))%"
+            modelStatusText = "Downloading \(selectedModelDisplayName) \(Int(progress * 100))%"
             clearErrorIfModelError()
         case .verifying:
             isModelReady = false
             modelDownloadProgress = nil
-            modelStatusText = "Verifying model..."
+            modelStatusText = "Verifying \(selectedModelDisplayName)..."
         case .ready:
             isModelReady = true
             modelDownloadProgress = nil
-            modelStatusText = "Model ready"
+            if selectedModel.backendKind == .whisper {
+                modelStatusText = "\(selectedModelDisplayName) (downloads on first use)"
+            } else {
+                modelStatusText = "\(selectedModelDisplayName) ready"
+            }
             clearErrorIfModelError()
         case .failed(let error):
             isModelReady = false
             modelDownloadProgress = nil
-            modelStatusText = "Model download failed"
-            setError(.modelDownloadFailed(error.localizedDescription))
+            modelStatusText = "\(selectedModelDisplayName) download failed"
+            setError(.modelDownloadFailed(error))
         }
     }
 
@@ -606,6 +698,19 @@ private extension MenuBarViewModel {
                 break
             }
         }
+    }
+
+    func resetWhisperCache() {
+        let fileManager = FileManager.default
+        let rootURL = huggingFaceHomeURL
+        if fileManager.fileExists(atPath: rootURL.path) {
+            try? fileManager.removeItem(at: rootURL)
+        }
+        try? fileManager.createDirectory(at: rootURL, withIntermediateDirectories: true)
+
+        // Restart the backend so the next session re-loads from a clean cache.
+        backendServiceManager.stop()
+        backendServiceManager.start()
     }
 
     enum MicrophoneAccessState {

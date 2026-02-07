@@ -550,6 +550,254 @@ class TranscriptionBackend:
         logger.info("Model unloaded")
 
 
+class WhisperTranscriptionBackend:
+    """Transcription backend using faster-whisper (CTranslate2).
+
+    This backend is significantly smaller than Voxtral and runs well on Apple
+    Silicon. Model weights are fetched from Hugging Face into `HF_HOME` (set by
+    the app) on first use.
+    """
+
+    def __init__(self, config: ModelConfig) -> None:
+        self.config = config
+        self._model_loaded = False
+        self._model = None
+        self._np = None
+        self._soxr = None
+        self._device = "cpu"
+        self._compute_type = "int8"
+
+        self._init_audio_processor()
+
+    async def load_model(self) -> None:
+        logger.info("Loading Whisper model via faster-whisper...")
+        if self.config.model_path:
+            logger.info(f"  model_path: {self.config.model_path}")
+        logger.info(f"  model_name: {self.config.model_name}")
+
+        try:
+            from faster_whisper import WhisperModel
+        except ImportError as e:
+            raise RuntimeError(
+                "faster-whisper is required. Install with: pip install 'voxtral-backend[whisper]'"
+            ) from e
+
+        model_name = self.config.model_path or self.config.model_name
+
+        requested_device = os.getenv("VOXTRAL_DEVICE", "auto").strip().lower()
+        requested_compute_type = os.getenv("VOXTRAL_WHISPER_COMPUTE_TYPE", "").strip()
+
+        if requested_device in ("", "auto"):
+            # Prefer Metal on Apple Silicon, with a CPU fallback.
+            device_candidates = ["metal", "cpu"]
+        else:
+            device_candidates = [requested_device, "cpu"]
+
+        last_error: Exception | None = None
+        for device in device_candidates:
+            compute_type = requested_compute_type or ("float16" if device == "metal" else "int8")
+            try:
+                def load_sync():
+                    return WhisperModel(model_name, device=device, compute_type=compute_type)
+
+                self._model = await asyncio.to_thread(load_sync)
+                self._device = device
+                self._compute_type = compute_type
+                break
+            except Exception as e:
+                last_error = e
+                self._model = None
+                continue
+
+        if self._model is None:
+            raise RuntimeError(f"Failed to load Whisper model '{model_name}': {last_error}") from last_error
+
+        self._model_loaded = True
+        logger.info(f"Whisper model loaded (device={self._device}, compute_type={self._compute_type})")
+
+    def _init_audio_processor(self) -> None:
+        try:
+            import numpy as np
+
+            self._np = np
+        except ImportError:
+            self._np = None
+            self._soxr = None
+            return
+
+        try:
+            import soxr
+
+            self._soxr = soxr
+        except ImportError:
+            self._soxr = None
+
+    def _resample_audio(
+        self,
+        audio_array: "np.ndarray",
+        target_sample_rate: int,
+        source_sample_rate: int,
+    ) -> "np.ndarray":
+        if source_sample_rate == target_sample_rate or self._soxr is None:
+            return audio_array
+
+        resampled = self._soxr.resample(
+            audio_array,
+            source_sample_rate,
+            target_sample_rate,
+            quality="HQ",
+        )
+        return resampled.astype(self._np.float32)
+
+    async def process_audio(
+        self,
+        session: TranscriptionSession,
+        on_transcript: callable,
+    ) -> None:
+        import time
+
+        session.start_time = time.time()
+        frame_sample_count = session.input_frame_samples * session.input_channels
+        frame_size_bytes = frame_sample_count * 4  # f32le = 4 bytes per sample
+
+        audio_buffer: bytearray = bytearray()
+        frames_since_last_transcript = 0
+        delay_frames = max(1, session.transcription_delay_ms // 20)  # 20ms per frame
+        drain_timeout_s = 1.0
+
+        async def handle_frame(audio_bytes: bytes) -> None:
+            nonlocal frames_since_last_transcript
+            if len(audio_bytes) != frame_size_bytes:
+                return
+
+            audio_buffer.extend(audio_bytes)
+            frames_since_last_transcript += 1
+
+            if frames_since_last_transcript >= delay_frames:
+                await self._transcribe_buffer(
+                    session,
+                    audio_buffer,
+                    on_transcript,
+                )
+                audio_buffer.clear()
+                frames_since_last_transcript = 0
+
+        async def drain_queue() -> None:
+            deadline = time.monotonic() + drain_timeout_s
+            while time.monotonic() < deadline:
+                try:
+                    audio_bytes = await asyncio.wait_for(
+                        session.audio_queue.get(),
+                        timeout=0.1,
+                    )
+                except asyncio.TimeoutError:
+                    if session.audio_queue.empty():
+                        break
+                    continue
+                await handle_frame(audio_bytes)
+
+        try:
+            while not session.stop_requested.is_set():
+                try:
+                    audio_bytes = await asyncio.wait_for(
+                        session.audio_queue.get(),
+                        timeout=0.1,
+                    )
+                except asyncio.TimeoutError:
+                    if audio_buffer and frames_since_last_transcript >= delay_frames:
+                        await self._transcribe_buffer(session, audio_buffer, on_transcript)
+                        audio_buffer.clear()
+                        frames_since_last_transcript = 0
+                    continue
+
+                if session.stop_requested.is_set():
+                    break
+
+                await handle_frame(audio_bytes)
+
+            await drain_queue()
+            if audio_buffer:
+                await self._transcribe_buffer(session, audio_buffer, on_transcript)
+        except Exception as e:
+            logger.error(f"Error processing audio (whisper): {e}", exc_info=True)
+            raise
+
+    def _normalize_language(self, language: str | None) -> str | None:
+        if not language or language == "auto":
+            return None
+        code = language.strip().lower()
+        if "-" in code:
+            code = code.split("-", 1)[0]
+        return code or None
+
+    async def _transcribe_buffer(
+        self,
+        session: TranscriptionSession,
+        audio_buffer: bytes,
+        on_transcript: callable,
+    ) -> None:
+        import time
+
+        if not self._model_loaded or self._model is None or self._np is None:
+            return
+
+        elapsed_ms = int((time.time() - session.start_time) * 1000)
+        session.sequence += 1
+
+        try:
+            # Convert bytes to float32 waveform.
+            audio_array = self._np.frombuffer(audio_buffer, dtype=self._np.float32)
+            if session.input_channels > 1:
+                audio_array = audio_array.reshape(-1, session.input_channels).mean(axis=1)
+
+            # Resample to the model sample rate if needed.
+            audio_array = self._resample_audio(
+                audio_array,
+                target_sample_rate=self.config.sample_rate,
+                source_sample_rate=session.input_sample_rate,
+            )
+            audio_array = self._np.clip(audio_array, -1.0, 1.0)
+
+            language = self._normalize_language(session.language)
+
+            def transcribe_sync(waveform) -> str:
+                segments, _info = self._model.transcribe(
+                    waveform,
+                    language=language,
+                    beam_size=1,
+                    best_of=1,
+                    temperature=0.0,
+                    # Streaming-friendly: don't condition on previous chunks to avoid repeats.
+                    condition_on_previous_text=False,
+                )
+                texts: list[str] = []
+                for seg in segments:
+                    text = (getattr(seg, "text", "") or "").strip()
+                    if text:
+                        texts.append(text)
+                return " ".join(texts)
+
+            text = await asyncio.to_thread(transcribe_sync, audio_array)
+
+            if text:
+                await on_transcript(
+                    TranscriptMessage(
+                        seq=session.sequence,
+                        start_ms=elapsed_ms,
+                        end_ms=elapsed_ms + session.transcription_delay_ms,
+                        text=text,
+                        is_final=True,
+                        confidence=0.80,
+                    )
+                )
+        except Exception as e:
+            logger.error(f"Error during transcription (whisper): {e}", exc_info=True)
+
+    async def unload_model(self) -> None:
+        self._model = None
+        self._model_loaded = False
+
+
 async def handle_connection(
     websocket: WebSocketServerProtocol,
     backend: TranscriptionBackend,
@@ -797,7 +1045,13 @@ def resolve_ws_host() -> str:
 async def main_async() -> None:
     """Main async entry point."""
     config = load_config_from_env()
-    backend = TranscriptionBackend(config)
+    backend_kind = os.getenv("VOXTRAL_BACKEND", "voxtral").strip().lower()
+    if backend_kind in ("whisper", "faster-whisper", "faster_whisper"):
+        backend = WhisperTranscriptionBackend(config)
+        logger.info("Selected backend: whisper (faster-whisper)")
+    else:
+        backend = TranscriptionBackend(config)
+        logger.info("Selected backend: voxtral (vLLM Metal)")
 
     port = int(os.getenv("VOXTRAL_PORT", "8765"))
     host = resolve_ws_host()

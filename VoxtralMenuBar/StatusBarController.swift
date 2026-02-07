@@ -6,6 +6,7 @@ final class StatusBarController: NSObject {
     private let statusItem: NSStatusItem
     private let popover: NSPopover
     private let viewModel: MenuBarViewModel
+    private var preferencesWindowController: PreferencesWindowController?
     private var cancellables = Set<AnyCancellable>()
 
     init(backendServiceManager: BackendServiceManager = .shared, modelAssetManager: ModelAssetManager = .shared) {
@@ -31,8 +32,12 @@ final class StatusBarController: NSObject {
 
     private func configurePopover() {
         popover.behavior = .transient
-        popover.contentSize = NSSize(width: 320, height: 300)
-        popover.contentViewController = NSHostingController(rootView: PopoverView(viewModel: viewModel))
+        popover.contentSize = NSSize(width: 360, height: 460)
+        popover.contentViewController = NSHostingController(
+            rootView: PopoverView(viewModel: viewModel, onOpenPreferences: { [weak self] in
+                self?.showPreferences()
+            })
+        )
     }
 
     private func bindViewModel() {
@@ -79,5 +84,15 @@ final class StatusBarController: NSObject {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             NSApp.activate(ignoringOtherApps: true)
         }
+    }
+
+    private func showPreferences() {
+        if popover.isShown {
+            popover.performClose(nil)
+        }
+        if preferencesWindowController == nil {
+            preferencesWindowController = PreferencesWindowController(viewModel: viewModel)
+        }
+        preferencesWindowController?.show()
     }
 }

@@ -2,9 +2,31 @@
 # ABOUTME: Loads env overrides and normalizes dtype values.
 """Backend configuration for Voxtral transcription model."""
 
-from dataclasses import dataclass, field
-from typing import Literal
+from dataclasses import dataclass
 import os
+
+
+def normalize_dtype(value: str) -> str:
+    """Map legacy dtype strings to the values expected by vLLM.
+
+    vLLM expects dtypes like "bfloat16"/"float16"/"float32" (or "auto"). Older
+    versions of this project used "bf16"/"f16"/"f32".
+    """
+    lowered = value.strip().lower()
+    mapping = {
+        "auto": "auto",
+        "bf16": "bfloat16",
+        "bfloat16": "bfloat16",
+        "f16": "float16",
+        "half": "float16",
+        "float16": "float16",
+        "fp16": "float16",
+        "f32": "float32",
+        "float": "float32",
+        "float32": "float32",
+        "fp32": "float32",
+    }
+    return mapping.get(lowered, value)
 
 
 @dataclass(frozen=True)
@@ -16,7 +38,8 @@ class ModelConfig:
     model_path: str | None = None
 
     # Model loading settings
-    dtype: Literal["bf16", "f16", "f32"] = "bf16"
+    # vLLM dtype strings (see normalize_dtype)
+    dtype: str = "bfloat16"
     max_model_len: int = 131072  # ~3 hours at default settings
 
     # Inference settings
@@ -38,12 +61,13 @@ class ModelConfig:
         """Create config from environment variables with defaults."""
         model_path = os.getenv("VOXTRAL_MODEL_PATH")
         model_name = os.getenv("VOXTRAL_MODEL_NAME", cls.model_name)
+        dtype = normalize_dtype(os.getenv("VOXTRAL_DTYPE", cls.dtype))
         if model_path:
             model_name = model_path
         return cls(
             model_name=model_name,
             model_path=model_path,
-            dtype=os.getenv("VOXTRAL_DTYPE", cls.dtype),
+            dtype=dtype,
             max_model_len=int(os.getenv("VOXTRAL_MAX_MODEL_LEN", str(cls.max_model_len))),
             temperature=float(os.getenv("VOXTRAL_TEMPERATURE", str(cls.temperature))),
             transcription_delay_ms=int(os.getenv("VOXTRAL_TRANSCRIPTION_DELAY_MS", str(cls.transcription_delay_ms))),

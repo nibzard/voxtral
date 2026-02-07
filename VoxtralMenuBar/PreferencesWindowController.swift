@@ -3,13 +3,16 @@ import SwiftUI
 
 final class PreferencesWindowController: NSWindowController {
     init(viewModel: MenuBarViewModel) {
-        let window = NSWindow(contentViewController: nil)
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 520, height: 460),
+            styleMask: [.titled, .closable, .miniaturizable],
+            backing: .buffered,
+            defer: false
+        )
         window.title = "Preferences"
-        window.styleMask = [.titled, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
         window.level = .normal
         window.collectionBehavior = [.moveToActiveSpace]
-        window.setContentSize(NSSize(width: 520, height: 460))
         window.center()
 
         super.init(window: window)

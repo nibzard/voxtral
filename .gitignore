@@ -1,6 +1,11 @@
 # Python standalone runtime cache (downloaded during build)
 .python-standalone-cache/
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
 # macOS
 .DS_Store
 

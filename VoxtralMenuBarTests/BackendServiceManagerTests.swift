@@ -41,18 +41,27 @@ final class BackendServiceManagerTests: XCTestCase {
 
     func testStateTransitions() {
         let manager = BackendServiceManager()
-        let stateExpectation = expectation(description: "State transitions to starting then running")
+        let startingExpectation = expectation(description: "State transitions to starting")
+        let runningExpectation = expectation(description: "State transitions to running")
+        var sawStarting = false
+        var sawRunning = false
 
         // Observe state changes
         let cancellable = statePublisher(for: manager).sink { state in
-            if state == .starting || state == .running {
-                stateExpectation.fulfill()
+            // BackendServiceManager can emit duplicate states (e.g. process restart). Only fulfill each once.
+            if state == .starting, !sawStarting {
+                sawStarting = true
+                startingExpectation.fulfill()
+            }
+            if state == .running, !sawRunning {
+                sawRunning = true
+                runningExpectation.fulfill()
             }
         }
 
         manager.start()
 
-        wait(for: [stateExpectation], timeout: 5.0)
+        wait(for: [startingExpectation, runningExpectation], timeout: 5.0, enforceOrder: true)
         cancellable.cancel()
 
         // Clean up

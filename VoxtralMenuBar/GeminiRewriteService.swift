@@ -5,7 +5,9 @@ final class GeminiRewriteService {
         var apiKey: String
         var model: String = "gemini-2.0-flash-exp"
         var apiEndpoint: String = "generativelanguage.googleapis.com"
-        var apiPath: String = "/v1beta/models/\(model):generateContent"
+        var apiPath: String {
+            "/v1beta/models/\(model):generateContent"
+        }
         var timeout: TimeInterval = 30.0
     }
 
@@ -80,7 +82,7 @@ final class GeminiRewriteService {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = configuration.apiEndpoint
-        urlComponents.path = "/v1beta/models/\(configuration.model):generateContent"
+        urlComponents.path = configuration.apiPath
         urlComponents.queryItems = [
             URLQueryItem(name: "key", value: configuration.apiKey)
         ]

@@ -2,83 +2,125 @@ import SwiftUI
 
 struct PopoverView: View {
     @ObservedObject var viewModel: MenuBarViewModel
+    let onOpenPreferences: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             header
-            statusSection
-            modelSection
-            errorSection
+            statusCard
+            modelCard
+            errorCard
             recordButton
             rewriteIndicator
             Divider()
-            outputSection
-            actionRow
+            outputCard
             Divider()
-            preferencesButton
-            Button("Quit Voxtral", action: viewModel.quitApp)
+            footerButtons
         }
         .padding(16)
-        .frame(width: 320, alignment: .leading)
-        .sheet(isPresented: $viewModel.isShowingPreferences) {
-            PreferencesView(viewModel: viewModel)
-        }
+        .frame(width: 360, alignment: .leading)
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Voxtral")
-                .font(.headline)
-            Text("Menu Bar Transcriber")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "waveform")
+                .font(.title2)
+                .foregroundStyle(.tint)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Voxtral")
+                    .font(.headline)
+                Text("Menu Bar Transcriber")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 0)
+
+            Circle()
+                .fill(statusColor)
+                .frame(width: 10, height: 10)
+                .accessibilityHidden(true)
         }
     }
 
-    private var statusSection: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 8, height: 8)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Status")
+    private var statusCard: some View {
+        Card {
+            HStack(alignment: .firstTextBaseline) {
+                Label("Status", systemImage: "dot.radiowaves.left.and.right")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Spacer()
                 Text(viewModel.statusText)
-                    .font(.body)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+            }
+
+            if viewModel.currentLatencyMs > 0 {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("Latency")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(Int(viewModel.currentLatencyMs.rounded())) ms")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var modelCard: some View {
+        Card {
+            HStack(alignment: .firstTextBaseline) {
+                Label("Model", systemImage: "cube.transparent")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+
+            if let progress = viewModel.modelDownloadProgress {
+                VStack(alignment: .leading, spacing: 6) {
+                    ProgressView(value: progress)
+                    Text(viewModel.modelStatusText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Text(viewModel.modelStatusText)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
         }
     }
 
     @ViewBuilder
-    private var errorSection: some View {
+    private var errorCard: some View {
         if let error = viewModel.currentError {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 6) {
+            Card(tint: .orange) {
+                HStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
-                        .font(.caption)
                     Text("Error")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(error.errorDescription ?? "Unknown error")
                         .font(.subheadline)
-                        .foregroundStyle(.primary)
-                    if let suggestion = error.recoverySuggestion {
-                        Text(suggestion)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                        .fontWeight(.semibold)
+                    Spacer()
                 }
+
+                Text(error.errorDescription ?? "Unknown error")
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let suggestion = error.recoverySuggestion {
+                    Text(suggestion)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 errorActions(for: error)
             }
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.orange.opacity(0.1))
-            )
         }
     }
 
@@ -87,21 +129,24 @@ struct PopoverView: View {
         switch error {
         case .microphoneDenied:
             Button("Open System Settings…", action: viewModel.openSystemSettingsForMicrophone)
-                .font(.caption)
                 .buttonStyle(.bordered)
         case .backendLaunchFailed, .backendNotReady:
             Button("Retry", action: viewModel.retryBackend)
-                .font(.caption)
                 .buttonStyle(.bordered)
         case .modelDownloadFailed:
-            Button("Retry Download", action: viewModel.retryModelDownload)
-                .font(.caption)
-                .buttonStyle(.bordered)
+            HStack(spacing: 8) {
+                Button("Retry Download", action: viewModel.retryModelDownload)
+                    .buttonStyle(.bordered)
+                Button("Reset", action: viewModel.resetModel)
+                    .buttonStyle(.bordered)
+                Button("Open Folder", action: viewModel.openModelFolder)
+                    .buttonStyle(.bordered)
+                Spacer(minLength: 0)
+            }
         case .modelNotReady:
             EmptyView()
         case .outputFolderUnavailable, .outputFolderAccessDenied:
             Button("Change Folder…", action: viewModel.selectOutputFolder)
-                .font(.caption)
                 .buttonStyle(.bordered)
         case .transcriptionFailed:
             EmptyView()
@@ -109,37 +154,29 @@ struct PopoverView: View {
     }
 
     private var recordButton: some View {
-        HStack(spacing: 8) {
-            Button(viewModel.recordButtonTitle, action: viewModel.toggleRecording)
-                .buttonStyle(.borderedProminent)
-                .tint(viewModel.recordButtonTint)
-                .keyboardShortcut("r", modifiers: [.command, .shift])
-                .accessibilityLabel(viewModel.recordButtonTitle)
-                .accessibilityHint("Toggle recording (Command-Shift-R)")
-                .disabled(viewModel.isRecordButtonDisabled)
-            Spacer(minLength: 0)
+        HStack(spacing: 10) {
+            Button(action: viewModel.toggleRecording) {
+                HStack {
+                    Image(systemName: isRecordingLike ? "stop.fill" : "record.circle.fill")
+                    Text(viewModel.recordButtonTitle)
+                        .fontWeight(.semibold)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(viewModel.recordButtonTint)
+            .keyboardShortcut("r", modifiers: [.command, .shift])
+            .accessibilityLabel(viewModel.recordButtonTitle)
+            .accessibilityHint("Toggle recording (Command-Shift-R)")
+            .disabled(viewModel.isRecordButtonDisabled)
+
             ShortcutBadge(text: "Cmd+Shift+R")
         }
     }
 
-    private var outputSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Output Folder")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(viewModel.outputFolderPath)
-                .font(.callout)
-                .lineLimit(2)
-                .foregroundStyle(viewModel.isOutputFolderSet ? .primary : .secondary)
-        }
-    }
-
-    private var actionRow: some View {
-        HStack(spacing: 8) {
-            Button("Change…", action: viewModel.selectOutputFolder)
-            Button("Open Folder", action: viewModel.openOutputFolder)
-                .disabled(!viewModel.isOutputFolderSet)
-        }
+    private var isRecordingLike: Bool {
+        viewModel.status == .recording || viewModel.status == .transcribing
     }
 
     @ViewBuilder
@@ -155,36 +192,35 @@ struct PopoverView: View {
         }
     }
 
-    @ViewBuilder
-    private var modelSection: some View {
-        if viewModel.shouldShowModelStatus {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Model")
+    private var outputCard: some View {
+        Card {
+            HStack(alignment: .firstTextBaseline) {
+                Label("Output", systemImage: "folder")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                if let progress = viewModel.modelDownloadProgress {
-                    HStack(spacing: 8) {
-                        ProgressView(value: progress)
-                            .frame(width: 160)
-                        Text(viewModel.modelStatusText)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                } else {
-                    Text(viewModel.modelStatusText)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
+                Spacer()
+            }
+
+            Text(viewModel.outputFolderPath)
+                .font(.callout)
+                .lineLimit(2)
+                .foregroundStyle(viewModel.isOutputFolderSet ? .primary : .secondary)
+
+            HStack(spacing: 8) {
+                Button("Change…", action: viewModel.selectOutputFolder)
+                Button("Open", action: viewModel.openOutputFolder)
+                    .disabled(!viewModel.isOutputFolderSet)
+                Spacer(minLength: 0)
             }
         }
     }
 
-    private var preferencesButton: some View {
-        Button("Preferences…") {
-            viewModel.isShowingPreferences = true
+    private var footerButtons: some View {
+        HStack(spacing: 10) {
+            Button("Preferences…", action: onOpenPreferences)
+            Button("Quit", action: viewModel.quitApp)
+            Spacer(minLength: 0)
         }
-        .controlSize(.large)
-        .frame(maxWidth: .infinity)
     }
 
     private var statusColor: Color {
@@ -203,78 +239,28 @@ struct PopoverView: View {
     }
 }
 
-struct PreferencesView: View {
-    @ObservedObject var viewModel: MenuBarViewModel
-    @Environment(\.dismiss) private var dismiss
-    @FocusState private var isAPIKeyFieldFocused: Bool
+private struct Card<Content: View>: View {
+    let tint: Color?
+    @ViewBuilder let content: () -> Content
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Preferences")
-                .font(.headline)
-            Divider()
-            geminiSection
-            Divider()
-            HStack {
-                Spacer()
-                Button("Done") {
-                    viewModel.saveGeminiAPIKey()
-                    dismiss()
-                }
-                    .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(20)
-        .frame(width: 400, alignment: .leading)
-        .onDisappear {
-            viewModel.saveGeminiAPIKey()
-        }
+    init(tint: Color? = nil, @ViewBuilder content: @escaping () -> Content) {
+        self.tint = tint
+        self.content = content
     }
 
-    private var geminiSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Gemini Rewrite (Optional)")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-
-            Text("When enabled, transcripts are rewritten using Gemini Flash to fix errors and improve formatting.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Text("Privacy: When enabled, transcript text is sent to Google Gemini over HTTPS for rewriting. Audio stays on your Mac.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-
-            HStack(spacing: 8) {
-                SecureField("API Key", text: $viewModel.geminiAPIKeyInput, onCommit: {
-                    viewModel.saveGeminiAPIKey()
-                })
-                    .textFieldStyle(.roundedBorder)
-                    .focused($isAPIKeyFieldFocused)
-                Button("Save") {
-                    viewModel.saveGeminiAPIKey()
-                    isAPIKeyFieldFocused = false
-                }
-                    .controlSize(.regular)
-            }
-
-            HStack(spacing: 8) {
-                Toggle("Enable rewrite on stop", isOn: Binding(
-                    get: { viewModel.isRewriteEnabled && viewModel.hasGeminiAPIKey },
-                    set: { _ in viewModel.toggleRewrite() }
-                ))
-                .disabled(!viewModel.hasGeminiAPIKey)
-                Spacer()
-            }
-
-            if viewModel.hasGeminiAPIKey {
-                Button("Remove API Key") {
-                    viewModel.deleteGeminiAPIKey()
-                }
-                .controlSize(.small)
-            }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            content()
         }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.regularMaterial)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder((tint ?? .primary).opacity(0.12), lineWidth: 1)
+        )
     }
 }
 
@@ -288,7 +274,7 @@ private struct ShortcutBadge: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .strokeBorder(Color.secondary.opacity(0.4), lineWidth: 1)
             )
             .accessibilityHidden(true)
