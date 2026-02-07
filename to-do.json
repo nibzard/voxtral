@@ -892,14 +892,16 @@
       "id": "T067",
       "title": "Align app display name with docs and transcript metadata",
       "priority": 4,
-      "status": "todo",
+      "status": "done",
       "details": "PRODUCT_NAME is VoxtralMenuBar and Info.plist lacks CFBundleDisplayName, but README/UI refer to \"Voxtral Menu Bar Transcriber\". Decide the canonical app name and update bundle display name/docs (and transcript header if needed) to match.",
       "files": [
         "VoxtralMenuBar.xcodeproj/project.pbxproj",
         "VoxtralMenuBar/Info.plist",
         "README.md",
-        "VoxtralMenuBar/OutputWriter.swift"
-      ]
+        "VoxtralMenuBar/OutputWriter.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:23:46Z"
     }
   ]
 }
