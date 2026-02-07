@@ -216,7 +216,12 @@ final class MenuBarViewModel: ObservableObject {
         }
         AppLogger.shared.logOutputFolderAccessGranted(folder: outputFolderURL.path)
 
-        guard isModelReady else {
+        let modelState = modelAssetManager.state
+        applyModelState(modelState)
+        guard case .ready = modelState else {
+            if case .failed = modelState {
+                return
+            }
             setError(.modelNotReady)
             return
         }

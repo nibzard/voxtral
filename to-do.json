@@ -725,11 +725,13 @@
       "id": "T054",
       "title": "Fix model download vs backend initialization race",
       "priority": 2,
-      "status": "todo",
+      "status": "done",
       "details": "MenuBarViewModel.swift:273-282 - isModelReady check is synchronous but model state is observed asynchronously. Model could transition from downloading to ready between check and start, causing backend to use unverified model. P1 critical from architecture review. Reviewer: architecture-reviewer Review date: 2026-02-07.",
       "files": [
-        "VoxtralMenuBar/MenuBarViewModel.swift"
-      ]
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:26:46Z"
     },
     {
       "id": "T055",
