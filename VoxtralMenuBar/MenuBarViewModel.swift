@@ -238,7 +238,10 @@ final class MenuBarViewModel: ObservableObject {
         status = .initializing
 
         do {
-            outputWriter = try OutputWriter(outputDirectory: outputFolderURL)
+            let configuredModelName = selectedModel.defaultModelNameForBackend
+            let resolvedModelName = configuredModelName.split(separator: "/").last.map(String.init) ?? configuredModelName
+            let configuration = OutputWriter.Configuration(modelName: resolvedModelName)
+            outputWriter = try OutputWriter(outputDirectory: outputFolderURL, configuration: configuration)
         } catch {
             handleOutputWriterError(error)
             return

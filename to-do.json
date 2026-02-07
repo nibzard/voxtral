@@ -904,6 +904,18 @@
       "updated_at": "2026-02-07T20:23:46Z"
     },
     {
+      "id": "T068",
+      "title": "Write selected model name into transcript header",
+      "priority": 3,
+      "status": "done",
+      "details": "OutputWriter is created with the default configuration, so transcript metadata always shows Voxtral-Mini-4B-Realtime-2602 even when a Whisper model is selected. Pass the selected model name (or display name) into OutputWriter.Configuration when starting a recording so headers match the active backend.",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:42:44Z"
+    },
+    {
       "id": "T069",
       "title": "Stabilize Gemini rewrite flow against transcript races",
       "priority": 2,
