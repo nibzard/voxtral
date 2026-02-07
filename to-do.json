@@ -609,11 +609,13 @@
       "id": "T044",
       "title": "Replace unsafe POSIX signal handlers with DispatchSourceSignal",
       "priority": 3,
-      "status": "todo",
-      "details": "main.swift registers SIGTERM/SIGINT handlers that call AppKit and logging APIs, which is not async-signal-safe. Use DispatchSourceSignal on the main queue (or rely on NSApplication termination notifications) to perform a safe shutdown.",
+      "status": "done",
+      "details": "main.swift registers SIGTERM/SIGINT handlers that call AppKit and logging APIs, which is not async-signal-safe. Use DispatchSourceSignal on the main queue (or rely on NSApplication termination notifications) to perform a safe shutdown. Verified main.swift already uses DispatchSourceSignal on the main queue for SIGTERM/SIGINT; no code changes required.",
       "files": [
-        "VoxtralMenuBar/main.swift"
-      ]
+        "VoxtralMenuBar/main.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:44:18Z"
     },
     {
       "id": "T045",
@@ -744,7 +746,7 @@
         "VoxtralMenuBar/OutputWriter.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:32:59Z"
+      "updated_at": "2026-02-07T19:33:27Z"
     },
     {
       "id": "T056",
@@ -753,9 +755,10 @@
       "status": "done",
       "details": "TranscriptionClient.swift:356-361 - completion handler is not weakly captured. If caller holds client strongly, this creates a retain cycle. P1 critical from Swift/macOS review. Reviewer: swift-macos-reviewer Review date: 2026-02-07.",
       "files": [
-        "VoxtralMenuBar/TranscriptionClient.swift"
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:36:49Z"
+      "updated_at": "2026-02-07T19:37:41Z"
     },
     {
       "id": "T057",
@@ -767,7 +770,7 @@
         "VoxtralMenuBar/BackendServiceManager.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:39:32Z"
+      "updated_at": "2026-02-07T19:43:16Z"
     },
     {
       "id": "T058",
@@ -779,7 +782,7 @@
         "backend/voxtral_backend/server.py",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:45:13Z"
+      "updated_at": "2026-02-07T19:47:26Z"
     },
     {
       "id": "T059",
@@ -791,7 +794,7 @@
         "backend/voxtral_backend/server.py",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:48:11Z"
+      "updated_at": "2026-02-07T19:50:13Z"
     },
     {
       "id": "T060",
@@ -800,24 +803,26 @@
       "status": "done",
       "details": "Aligned backpressure defaults across audio capture, WebSocket client, and backend queue sizing. Added shared BackpressureDefaults constants in the app and passed VOXTRAL_MAX_AUDIO_QUEUE_SIZE to the backend, which now reads the env value for queue max.",
       "files": [
-        "VoxtralMenuBar/BackpressureDefaults.swift",
         "VoxtralMenuBar/AudioCapturePipeline.swift",
-        "VoxtralMenuBar/TranscriptionClient.swift",
         "VoxtralMenuBar/BackendServiceManager.swift",
+        "VoxtralMenuBar/BackpressureDefaults.swift",
+        "VoxtralMenuBar/TranscriptionClient.swift",
         "backend/voxtral_backend/server.py",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:53:16Z"
+      "updated_at": "2026-02-07T19:57:59Z"
     },
     {
       "id": "T061",
       "title": "Fix force unwrap in PreferencesWindowController",
       "priority": 3,
-      "status": "todo",
+      "status": "done",
       "details": "PreferencesWindowController.swift:19 - Initial PreferencesView with empty closure is created and discarded. While not a crash risk, it's wasteful and the code flow is confusing. P2 critical from Swift/macOS review. Reviewer: swift-macos-reviewer Review date: 2026-02-07.",
       "files": [
-        "VoxtralMenuBar/PreferencesWindowController.swift"
-      ]
+        "VoxtralMenuBar/PreferencesWindowController.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:58:36Z"
     },
     {
       "id": "T062",
