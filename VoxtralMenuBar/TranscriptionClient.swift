@@ -344,20 +344,23 @@ final class TranscriptionClient: NSObject {
             return
         }
 
+        let data: Data
         do {
-            let data = try encoder.encode(message)
-            guard let text = String(data: data, encoding: .utf8) else {
-                completion?(TranscriptionClientError.encodingFailed)
-                return
-            }
-
-            task.send(.string(text)) { [weak self] error in
-                if let error {
-                    self?.emitEvent(.failure(error))
-                }
-            }
+            data = try encoder.encode(message)
         } catch {
-            emitEvent(.failure(error))
+            emitEvent(.failure(TranscriptionClientError.encodingFailed))
+            return
+        }
+
+        guard let text = String(data: data, encoding: .utf8) else {
+            emitEvent(.failure(TranscriptionClientError.encodingFailed))
+            return
+        }
+
+        task.send(.string(text)) { [weak self] error in
+            if let error {
+                self?.emitEvent(.failure(error))
+            }
         }
     }
 
