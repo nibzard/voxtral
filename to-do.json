@@ -665,11 +665,13 @@
       "id": "T049",
       "title": "Replace unsafe signal handlers with DispatchSourceSignal",
       "priority": 1,
-      "status": "todo",
+      "status": "done",
       "details": "main.swift:38-48 - Signal handlers call functions that are not async-signal-safe (AppLogger, BackendServiceManager, NSApp.terminate). This is undefined behavior and can cause deadlocks or crashes. P0 critical from Swift/macOS review. Note: T044 also covers this. Reviewer: swift-macos-reviewer Review date: 2026-02-07 Related to: T044.",
       "files": [
-        "VoxtralMenuBar/main.swift"
-      ]
+        "VoxtralMenuBar/main.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T18:55:34Z"
     },
     {
       "id": "T050",

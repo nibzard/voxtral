@@ -6,17 +6,19 @@ let delegate = AppDelegate()
 app.delegate = delegate
 app.setActivationPolicy(.accessory)
 
-// Set up signal handlers for safe shutdown
-signal(SIGTERM) { _ in
-    AppLogger.shared.logApplicationTerminate()
-    BackendServiceManager.shared.stop()
-    NSApp.terminate(nil)
+private func setUpSignalHandler(_ signalNumber: Int32) -> DispatchSourceSignal {
+    Darwin.signal(signalNumber, SIG_IGN)
+    let source = DispatchSource.makeSignalSource(signal: signalNumber, queue: .main)
+    source.setEventHandler {
+        AppLogger.shared.logApplicationTerminate()
+        BackendServiceManager.shared.stop()
+        NSApp.terminate(nil)
+    }
+    source.resume()
+    return source
 }
 
-signal(SIGINT) { _ in
-    AppLogger.shared.logApplicationTerminate()
-    BackendServiceManager.shared.stop()
-    NSApp.terminate(nil)
-}
+let signalSources = [setUpSignalHandler(SIGTERM), setUpSignalHandler(SIGINT)]
+signalSources.forEach { _ in }
 
 app.run()
