@@ -785,11 +785,13 @@
       "id": "T059",
       "title": "Fix redundant hasattr check in message serialization",
       "priority": 3,
-      "status": "todo",
+      "status": "done",
       "details": "server.py:789 - Double hasattr check is redundant and confusing. If asdict exists, it's called; otherwise use __dict__. But condition checks twice - this is a bug. P2 critical from Python/ML review. Reviewer: python-ml-reviewer Review date: 2026-02-07.",
       "files": [
-        "backend/voxtral_backend/server.py"
-      ]
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:48:11Z"
     },
     {
       "id": "T060",

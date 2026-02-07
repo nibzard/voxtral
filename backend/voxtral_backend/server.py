@@ -552,7 +552,7 @@ async def handle_connection(
     async def send_message(msg: dict[str, Any] | dataclass) -> None:
         """Send a JSON message to the client."""
         if hasattr(msg, "asdict"):
-            data = msg.asdict() if hasattr(msg, "asdict") else msg.__dict__
+            data = msg.asdict()
         elif isinstance(msg, dict):
             data = msg
         else:
