@@ -203,8 +203,8 @@ internal extension OutputWriter {
     }()
 
     func write(_ string: String) {
-        queue.async { [weak self] in
-            guard let self, !self.isClosed else { return }
+        queue.async { [self] in
+            guard !self.isClosed else { return }
             guard let data = string.data(using: .utf8) else { return }
             self.fileHandle.write(data)
         }

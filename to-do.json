@@ -657,9 +657,10 @@
       "status": "done",
       "details": "Info.plist missing NSPrivacyAccessedAPITypes or related privacy keys for Gemini API usage. This could cause App Store rejection. Users must be informed about third-party data transmission. P0 critical from security review. Reviewer: security-reviewer Review date: 2026-02-07.",
       "files": [
-        "VoxtralMenuBar/Info.plist"
+        "VoxtralMenuBar/Info.plist",
+        "to-do.json"
       ],
-      "updated_at": "2026-02-07T18:53:28Z"
+      "updated_at": "2026-02-07T18:54:33Z"
     },
     {
       "id": "T049",
@@ -671,7 +672,7 @@
         "VoxtralMenuBar/main.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T18:55:34Z"
+      "updated_at": "2026-02-07T18:58:35Z"
     },
     {
       "id": "T050",
@@ -683,7 +684,7 @@
         "backend/voxtral_backend/server.py",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:00:59Z"
+      "updated_at": "2026-02-07T19:04:43Z"
     },
     {
       "id": "T051",
@@ -695,7 +696,7 @@
         "backend/voxtral_backend/server.py",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:05:46Z"
+      "updated_at": "2026-02-07T19:09:32Z"
     },
     {
       "id": "T052",
@@ -707,7 +708,7 @@
         "backend/voxtral_backend/server.py",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:11:12Z"
+      "updated_at": "2026-02-07T19:13:50Z"
     },
     {
       "id": "T053",
@@ -719,7 +720,7 @@
         "VoxtralMenuBar/MenuBarViewModel.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:19:54Z"
+      "updated_at": "2026-02-07T19:24:03Z"
     },
     {
       "id": "T054",
@@ -731,17 +732,19 @@
         "VoxtralMenuBar/MenuBarViewModel.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:26:46Z"
+      "updated_at": "2026-02-07T19:29:21Z"
     },
     {
       "id": "T055",
       "title": "Fix file handle cleanup race in OutputWriter.deinit",
       "priority": 2,
-      "status": "todo",
+      "status": "done",
       "details": "OutputWriter.swift:102-104 - deinit calls finish() which closes file handle, but deinit can be called from any thread. The finish() method does queue checking but there's still a race condition. P1 critical from Swift/macOS review. Reviewer: swift-macos-reviewer Review date: 2026-02-07.",
       "files": [
-        "VoxtralMenuBar/OutputWriter.swift"
-      ]
+        "VoxtralMenuBar/OutputWriter.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:32:59Z"
     },
     {
       "id": "T056",
