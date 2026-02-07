@@ -761,11 +761,13 @@
       "id": "T057",
       "title": "Add SIGKILL fallback to process termination",
       "priority": 2,
-      "status": "todo",
+      "status": "done",
       "details": "BackendServiceManager.swift:148-155 - Process.terminate() sends SIGTERM which can be ignored. Should have a SIGKILL fallback after a timeout to ensure process actually terminates. P1 critical from Swift/macOS review. Reviewer: swift-macos-reviewer Review date: 2026-02-07.",
       "files": [
-        "VoxtralMenuBar/BackendServiceManager.swift"
-      ]
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:39:32Z"
     },
     {
       "id": "T058",

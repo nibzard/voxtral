@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 final class BackendServiceManager: ObservableObject {
     static let shared = BackendServiceManager()
@@ -19,6 +20,7 @@ final class BackendServiceManager: ObservableObject {
         var maxRestartAttempts: Int = 5
         var baseRetryDelay: TimeInterval = 1.0
         var maxRetryDelay: TimeInterval = 30.0
+        var terminationTimeout: TimeInterval = 2.0
     }
 
     enum BackendServiceError: Error {
@@ -29,6 +31,7 @@ final class BackendServiceManager: ObservableObject {
     private let queue = DispatchQueue(label: "voxtral.backend.service")
     private var process: Process?
     private var restartWorkItem: DispatchWorkItem?
+    private var terminationWorkItem: DispatchWorkItem?
     private var restartAttempts = 0
     private var shouldKeepRunning = false
     private var modelPath: String?
@@ -127,8 +130,20 @@ final class BackendServiceManager: ObservableObject {
 
     private func terminateProcess() {
         guard let process else { return }
+        terminationWorkItem?.cancel()
+        terminationWorkItem = nil
         if process.isRunning {
             process.terminate()
+            let processID = process.processIdentifier
+            let workItem = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                defer { self.terminationWorkItem = nil }
+                guard process.isRunning else { return }
+                AppLogger.shared.logWarning("Backend did not exit after SIGTERM; sending SIGKILL")
+                kill(processID, SIGKILL)
+            }
+            terminationWorkItem = workItem
+            queue.asyncAfter(deadline: .now() + configuration.terminationTimeout, execute: workItem)
         }
         self.process = nil
     }
