@@ -633,12 +633,12 @@
       "id": "T046",
       "title": "Update Bundle Backend build outputs to python-runtime",
       "priority": 4,
-      "status": "todo",
-      "details": "The Xcode build phase outputPaths still reference backend/python-lib, but BundleBackend.sh now writes backend/python-runtime. Update outputPaths so incremental builds work correctly.",
+      "status": "done",
+      "details": "The Xcode build phase outputPaths still reference backend/python-lib, but BundleBackend.sh now writes backend/python-runtime. Update outputPaths so incremental builds work correctly. Verified Bundle Backend build phase outputPaths already use backend/python-runtime; no code changes required. Skipped commit.",
       "files": [
-        "VoxtralMenuBar.xcodeproj/project.pbxproj",
-        "VoxtralMenuBar/BundleBackend.sh"
-      ]
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:11:55Z"
     },
     {
       "id": "T047",
@@ -822,7 +822,7 @@
         "VoxtralMenuBar/PreferencesWindowController.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T19:58:36Z"
+      "updated_at": "2026-02-07T19:59:11Z"
     },
     {
       "id": "T062",
@@ -834,7 +834,7 @@
         "VoxtralMenuBar/ModelAssetManager.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:02:34Z"
+      "updated_at": "2026-02-07T20:07:10Z"
     },
     {
       "id": "T063",
@@ -849,7 +849,56 @@
         "backend/voxtral_backend/server.py",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:08:08Z"
+      "updated_at": "2026-02-07T20:10:25Z"
+    },
+    {
+      "id": "T064",
+      "title": "Fix TranscriptionClient sendJSON encoding error handling",
+      "priority": 1,
+      "status": "done",
+      "details": "TranscriptionClient.sendJSON references an undefined completion variable, which fails compilation. Remove the stray call and emit an encoding failure via onEvent/onState (or return early with a proper error).",
+      "files": [
+        "VoxtralMenuBar/TranscriptionClient.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:20:11Z"
+    },
+    {
+      "id": "T065",
+      "title": "Add PreferencesView.swift to tracked sources",
+      "priority": 2,
+      "status": "done",
+      "details": "VoxtralMenuBar/PreferencesView.swift is present locally but untracked while referenced by the Xcode project. Add it to git so clean checkouts build correctly.",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/PreferencesView.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:21:07Z"
+    },
+    {
+      "id": "T066",
+      "title": "Remove or consolidate duplicate BackendServiceManagerTests file under Voxtral/",
+      "priority": 4,
+      "status": "todo",
+      "details": "There is a second BackendServiceManagerTests.swift at Voxtral/VoxtralMenuBarTests/ that is not referenced by the Xcode project. Remove it or merge with the canonical test file to avoid drift/confusion.",
+      "files": [
+        "Voxtral/VoxtralMenuBarTests/BackendServiceManagerTests.swift",
+        "VoxtralMenuBarTests/BackendServiceManagerTests.swift"
+      ]
+    },
+    {
+      "id": "T067",
+      "title": "Align app display name with docs and transcript metadata",
+      "priority": 4,
+      "status": "todo",
+      "details": "PRODUCT_NAME is VoxtralMenuBar and Info.plist lacks CFBundleDisplayName, but README/UI refer to \"Voxtral Menu Bar Transcriber\". Decide the canonical app name and update bundle display name/docs (and transcript header if needed) to match.",
+      "files": [
+        "VoxtralMenuBar.xcodeproj/project.pbxproj",
+        "VoxtralMenuBar/Info.plist",
+        "README.md",
+        "VoxtralMenuBar/OutputWriter.swift"
+      ]
     }
   ]
 }
