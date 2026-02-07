@@ -177,6 +177,7 @@ final class MenuBarViewModel: ObservableObject {
     }
 
     private func startRecording() {
+        guard !isStopping else { return }
         clearError()
         transcriptLines.removeAll()
         recordingStartTime = Date().timeIntervalSince1970
@@ -261,15 +262,17 @@ final class MenuBarViewModel: ObservableObject {
     private func stopRecording() {
         guard !isStopping else { return }
         isStopping = true
+        pendingStartAfterPermission = false
 
         let writer = outputWriter
-        let client = transcriptionClient
-        let shouldRewrite = hasGeminiAPIKey && isRewriteEnabled && !transcriptLines.isEmpty
         let outputFileURL = writer?.fileURL
         let startTime = recordingStartTime
+        var didFinalizeStop = false
 
         let finalizeStop: () -> Void = { [weak self] in
             guard let self else { return }
+            guard !didFinalizeStop else { return }
+            didFinalizeStop = true
             writer?.finish()
 
             if let startTime {
@@ -277,6 +280,7 @@ final class MenuBarViewModel: ObservableObject {
                 AppLogger.shared.logRecordingStop(duration: duration)
             }
 
+            let shouldRewrite = self.hasGeminiAPIKey && self.isRewriteEnabled && !self.transcriptLines.isEmpty
             if shouldRewrite, let fileURL = outputFileURL {
                 Task { @MainActor in
                     await self.performRewrite(for: fileURL)
@@ -298,9 +302,8 @@ final class MenuBarViewModel: ObservableObject {
 
         audioCapturePipeline?.stop()
 
-        if let client {
-            client.stopSession { [client] in
-                _ = client
+        if let client = transcriptionClient {
+            client.stopSession {
                 DispatchQueue.main.async {
                     finalizeStop()
                 }

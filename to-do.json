@@ -713,11 +713,13 @@
       "id": "T053",
       "title": "Fix start/stop race conditions in MenuBarViewModel",
       "priority": 2,
-      "status": "todo",
+      "status": "done",
       "details": "MenuBarViewModel.swift:317-367 - isStopping flag set AFTER various reads that could change. Completion callback nesting creates retain cycles. finalizeStop closure execution order issues. P1 critical from architecture review. Reviewer: architecture-reviewer Review date: 2026-02-07.",
       "files": [
-        "VoxtralMenuBar/MenuBarViewModel.swift"
-      ]
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:19:54Z"
     },
     {
       "id": "T054",
