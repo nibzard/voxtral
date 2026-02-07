@@ -327,6 +327,39 @@ final class ModelAssetManager: NSObject {
 extension ModelAssetManager: URLSessionDownloadDelegate {
     func urlSession(
         _ session: URLSession,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+
+        let host = challenge.protectionSpace.host.lowercased()
+        guard Self.isPinnedHost(host) else {
+            AppLogger.shared.logError("Model download blocked: no pin for host \(host)")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
+        guard Self.evaluateServerTrust(serverTrust, host: host) else {
+            AppLogger.shared.logError("Model download blocked: TLS trust failed for host \(host)")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
+        guard Self.isServerTrustPinned(serverTrust, host: host) else {
+            AppLogger.shared.logError("Model download blocked: certificate pin mismatch for host \(host)")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
+        completionHandler(.useCredential, URLCredential(trust: serverTrust))
+    }
+
+    func urlSession(
+        _ session: URLSession,
         downloadTask: URLSessionDownloadTask,
         didWriteData bytesWritten: Int64,
         totalBytesWritten: Int64,
@@ -631,4 +664,47 @@ private extension ModelAssetManager {
             }
         }
     }
+}
+
+private extension ModelAssetManager {
+    static let pinnedCertificateHashesByHost: [String: Set<String>] = [
+        // Amazon RSA 2048 M02 intermediate (huggingface.co)
+        "huggingface.co": ["sPMwoxoMUJh+HDp7sCwt2mgpkdMWW1F71E+6SmAgvZQ="],
+        // Amazon RSA 2048 M04 intermediate (cas-bridge.xethub.hf.co)
+        "cas-bridge.xethub.hf.co": ["E4vfbiOslx605iayed1qJvBXUQ8d45QpOl7qKGDeAZs="]
+    ]
+
+    static func isPinnedHost(_ host: String) -> Bool {
+        pinnedCertificateHashesByHost[host] != nil
+    }
+
+    static func evaluateServerTrust(_ serverTrust: SecTrust, host: String) -> Bool {
+        let policy = SecPolicyCreateSSL(true, host as CFString)
+        SecTrustSetPolicies(serverTrust, policy)
+        var error: CFError?
+        return SecTrustEvaluateWithError(serverTrust, &error)
+    }
+
+    static func isServerTrustPinned(_ serverTrust: SecTrust, host: String) -> Bool {
+        guard let pins = pinnedCertificateHashesByHost[host], !pins.isEmpty else { return false }
+        let chainHashes = certificateChainHashes(for: serverTrust)
+        return !pins.isDisjoint(with: chainHashes)
+    }
+
+    static func certificateChainHashes(for trust: SecTrust) -> Set<String> {
+        var hashes: Set<String> = []
+        let count = SecTrustGetCertificateCount(trust)
+        guard count > 0 else { return hashes }
+
+        for index in 0..<count {
+            guard let certificate = SecTrustGetCertificateAtIndex(trust, index) else { continue }
+            let data = SecCertificateCopyData(certificate) as Data
+            let digest = SHA256.hash(data: data)
+            let hash = Data(digest).base64EncodedString()
+            hashes.insert(hash)
+        }
+
+        return hashes
+    }
+
 }

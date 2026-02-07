@@ -828,11 +828,13 @@
       "id": "T062",
       "title": "Implement certificate pinning for model downloads",
       "priority": 3,
-      "status": "todo",
-      "details": "ModelAssetManager.swift - HTTPS downloads from Hugging Face have SHA-256 verification post-download but no certificate pinning. Compromised CA or MITM could serve malicious model files before checksum verification. P2 critical from security review. Reviewer: security-reviewer Review date: 2026-02-07.",
+      "status": "done",
+      "details": "Added certificate pinning for model downloads by validating the TLS chain against pinned Amazon intermediate certificates for huggingface.co and cas-bridge.xethub.hf.co. Unknown hosts or pin mismatches are blocked.",
       "files": [
-        "VoxtralMenuBar/ModelAssetManager.swift"
-      ]
+        "VoxtralMenuBar/ModelAssetManager.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:02:34Z"
     },
     {
       "id": "T063",
