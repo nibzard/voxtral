@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import json
 import logging
 import os
@@ -17,6 +18,8 @@ from .config import ModelConfig, DEFAULT_CONFIG
 
 
 MAX_AUDIO_QUEUE_SIZE = 50
+DEFAULT_HOST = "127.0.0.1"
+ALLOWED_HOSTNAMES = {"localhost"}
 
 
 # Configure logging
@@ -735,13 +738,42 @@ def load_config_from_env() -> ModelConfig:
     return ModelConfig.from_env()
 
 
+def resolve_ws_host() -> str:
+    """Resolve a safe WebSocket bind host from environment variables."""
+    raw_host = os.getenv("VOXTRAL_HOST", DEFAULT_HOST)
+    host = raw_host.strip() if raw_host is not None else ""
+    if not host:
+        return DEFAULT_HOST
+
+    if host.lower() in ALLOWED_HOSTNAMES:
+        return host
+
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        logger.warning(
+            "Invalid VOXTRAL_HOST value '%s'; falling back to %s", host, DEFAULT_HOST
+        )
+        return DEFAULT_HOST
+
+    if not ip.is_loopback:
+        logger.warning(
+            "Non-loopback VOXTRAL_HOST value '%s' is not allowed; falling back to %s",
+            host,
+            DEFAULT_HOST,
+        )
+        return DEFAULT_HOST
+
+    return host
+
+
 async def main_async() -> None:
     """Main async entry point."""
     config = load_config_from_env()
     backend = TranscriptionBackend(config)
 
     port = int(os.getenv("VOXTRAL_PORT", "8765"))
-    host = os.getenv("VOXTRAL_HOST", "127.0.0.1")
+    host = resolve_ws_host()
 
     logger.info(f"Starting WebSocket server on ws://{host}:{port}")
     logger.info(f"Audio: {config.sample_rate} Hz, {config.channels} channel(s), {config.encoding}")

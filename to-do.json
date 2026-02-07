@@ -701,12 +701,13 @@
       "id": "T052",
       "title": "Validate WebSocket host configuration",
       "priority": 2,
-      "status": "todo",
+      "status": "done",
       "details": "server.py:988 - VOXTRAL_HOST env variable accepts any value without validation. Could be set to 0.0.0.0 exposing WebSocket to local network. Audio data and transcripts could be intercepted. P1 critical from security review. Reviewer: security-reviewer Review date: 2026-02-07.",
       "files": [
         "backend/voxtral_backend/server.py",
-        "VoxtralMenuBar/TranscriptionClient.swift"
-      ]
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:11:12Z"
     },
     {
       "id": "T053",
