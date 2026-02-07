@@ -677,11 +677,13 @@
       "id": "T050",
       "title": "Fix model loaded flag thread safety",
       "priority": 1,
-      "status": "todo",
+      "status": "done",
       "details": "server.py:449 - _model_loaded flag is set in load_model() without synchronization. If multiple connections trigger model loading simultaneously, this could cause race conditions. P0 critical from Python/ML review. Reviewer: python-ml-reviewer Review date: 2026-02-07.",
       "files": [
-        "backend/voxtral_backend/server.py"
-      ]
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:00:59Z"
     },
     {
       "id": "T051",

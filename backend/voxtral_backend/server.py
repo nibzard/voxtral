@@ -124,6 +124,7 @@ class TranscriptionBackend:
 
     def __init__(self, config: ModelConfig) -> None:
         self.config = config
+        self._model_lock = asyncio.Lock()
         self._model_loaded = False
         self._engine = None
         self._mistral_tokenizer = None
@@ -135,57 +136,61 @@ class TranscriptionBackend:
 
     async def load_model(self) -> None:
         """Load the Voxtral model with vLLM Metal."""
-        logger.info(f"Loading model: {self.config.model_name}")
-        if self.config.model_path:
-            logger.info(f"  model_path: {self.config.model_path}")
-        logger.info(f"  dtype: {self.config.dtype}")
-        logger.info(f"  max_model_len: {self.config.max_model_len}")
-        logger.info(f"  temperature: {self.config.temperature}")
-        logger.info(f"  transcription_delay_ms: {self.config.transcription_delay_ms}")
-        logger.info(f"  use_mlx: {self.config.use_mlx}")
-        logger.info(f"  memory_fraction: {self.config.memory_fraction}")
+        async with self._model_lock:
+            if self._model_loaded:
+                return
 
-        # Set vLLM Metal environment variables
-        os.environ["VLLM_METAL_USE_MLX"] = "true" if self.config.use_mlx else "false"
-        os.environ["VLLM_METAL_MEMORY_FRACTION"] = str(self.config.memory_fraction)
+            logger.info(f"Loading model: {self.config.model_name}")
+            if self.config.model_path:
+                logger.info(f"  model_path: {self.config.model_path}")
+            logger.info(f"  dtype: {self.config.dtype}")
+            logger.info(f"  max_model_len: {self.config.max_model_len}")
+            logger.info(f"  temperature: {self.config.temperature}")
+            logger.info(f"  transcription_delay_ms: {self.config.transcription_delay_ms}")
+            logger.info(f"  use_mlx: {self.config.use_mlx}")
+            logger.info(f"  memory_fraction: {self.config.memory_fraction}")
 
-        try:
-            from vllm import AsyncEngineArgs, AsyncLLMEngine
+            # Set vLLM Metal environment variables
+            os.environ["VLLM_METAL_USE_MLX"] = "true" if self.config.use_mlx else "false"
+            os.environ["VLLM_METAL_MEMORY_FRACTION"] = str(self.config.memory_fraction)
 
-            model_path = self.config.model_path or self.config.model_name
+            try:
+                from vllm import AsyncEngineArgs, AsyncLLMEngine
 
-            logger.info("Initializing vLLM AsyncLLMEngine...")
-            engine_args = AsyncEngineArgs(
-                model=model_path,
-                dtype=self.config.dtype,
-                max_model_len=self.config.max_model_len,
-                enforce_eager=True,
-                trust_remote_code=True,
-                gpu_memory_utilization=self.config.memory_fraction,
-            )
+                model_path = self.config.model_path or self.config.model_name
 
-            self._engine = AsyncLLMEngine.from_engine_args(engine_args)
+                logger.info("Initializing vLLM AsyncLLMEngine...")
+                engine_args = AsyncEngineArgs(
+                    model=model_path,
+                    dtype=self.config.dtype,
+                    max_model_len=self.config.max_model_len,
+                    enforce_eager=True,
+                    trust_remote_code=True,
+                    gpu_memory_utilization=self.config.memory_fraction,
+                )
 
-            # Load Mistral tokenizer for audio transcription encoding
-            self._init_mistral_tokenizer(model_path)
+                self._engine = AsyncLLMEngine.from_engine_args(engine_args)
 
-            # Initialize audio processor for resampling and feature extraction
-            self._init_audio_processor()
+                # Load Mistral tokenizer for audio transcription encoding
+                self._init_mistral_tokenizer(model_path)
 
-            self._model_loaded = True
-            logger.info("Model loaded successfully with vLLM Metal")
+                # Initialize audio processor for resampling and feature extraction
+                self._init_audio_processor()
 
-        except ImportError as e:
-            logger.error(
-                f"Failed to import vLLM: {e}. "
-                "Install with: pip install vllm vllm-metal"
-            )
-            raise RuntimeError(
-                "vLLM Metal is required. Install with: pip install vllm vllm-metal"
-            ) from e
-        except Exception as e:
-            logger.error(f"Failed to load model: {e}", exc_info=True)
-            raise
+                self._model_loaded = True
+                logger.info("Model loaded successfully with vLLM Metal")
+
+            except ImportError as e:
+                logger.error(
+                    f"Failed to import vLLM: {e}. "
+                    "Install with: pip install vllm vllm-metal"
+                )
+                raise RuntimeError(
+                    "vLLM Metal is required. Install with: pip install vllm vllm-metal"
+                ) from e
+            except Exception as e:
+                logger.error(f"Failed to load model: {e}", exc_info=True)
+                raise
 
     def _init_audio_processor(self) -> None:
         """Initialize audio processing components."""
