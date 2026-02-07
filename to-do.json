@@ -689,11 +689,13 @@
       "id": "T051",
       "title": "Fix audio queue race condition",
       "priority": 2,
-      "status": "todo",
+      "status": "done",
       "details": "server.py:817 - qsize() check and put() are not atomic. Between checking size and putting, the queue could grow beyond 50, leading to unbounded memory growth under heavy load. P1 critical from Python/ML review. Reviewer: python-ml-reviewer Review date: 2026-02-07.",
       "files": [
-        "backend/voxtral_backend/server.py"
-      ]
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:05:46Z"
     },
     {
       "id": "T052",

@@ -16,6 +16,9 @@ from websockets.server import WebSocketServerProtocol
 from .config import ModelConfig, DEFAULT_CONFIG
 
 
+MAX_AUDIO_QUEUE_SIZE = 50
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -97,7 +100,9 @@ class TranscriptionSession:
     started: bool = False
     sequence: int = 0
     start_time: float = 0.0
-    audio_queue: asyncio.Queue[bytes] = field(default_factory=asyncio.Queue)
+    audio_queue: asyncio.Queue[bytes] = field(
+        default_factory=lambda: asyncio.Queue(maxsize=MAX_AUDIO_QUEUE_SIZE)
+    )
     stop_requested: asyncio.Event = field(default_factory=asyncio.Event)
     input_sample_rate: int = 16000
     input_channels: int = 1
@@ -571,13 +576,13 @@ async def handle_connection(
                 if isinstance(raw_message, bytes):
                     if session and session.started:
                         # Apply backpressure if queue is too full
-                        if session.audio_queue.qsize() > 50:
+                        try:
+                            session.audio_queue.put_nowait(raw_message)
+                        except asyncio.QueueFull:
                             logger.warning(
-                                f"Audio queue full ({session.audio_queue.qsize()}), "
-                                "dropping frame"
+                                "Audio queue full (max=%d), dropping frame",
+                                MAX_AUDIO_QUEUE_SIZE,
                             )
-                            continue
-                        await session.audio_queue.put(raw_message)
                     continue
 
                 # Handle JSON control messages
