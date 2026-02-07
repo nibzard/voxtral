@@ -750,11 +750,12 @@
       "id": "T056",
       "title": "Fix memory leak in TranscriptionClient completion handler",
       "priority": 2,
-      "status": "todo",
+      "status": "done",
       "details": "TranscriptionClient.swift:356-361 - completion handler is not weakly captured. If caller holds client strongly, this creates a retain cycle. P1 critical from Swift/macOS review. Reviewer: swift-macos-reviewer Review date: 2026-02-07.",
       "files": [
         "VoxtralMenuBar/TranscriptionClient.swift"
-      ]
+      ],
+      "updated_at": "2026-02-07T19:36:49Z"
     },
     {
       "id": "T057",

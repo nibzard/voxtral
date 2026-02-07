@@ -335,14 +335,12 @@ final class TranscriptionClient: NSObject {
         }
         AppLogger.shared.logTranscriptionSessionEnd(sessionId: sessionId, reason: "client_stop")
         let message = StopMessage(sessionId: sessionId)
-        sendJSON(message) { _ in
-            completion()
-        }
+        sendJSON(message)
+        completion()
     }
 
-    private func sendJSON<T: Encodable>(_ message: T, completion: ((Error?) -> Void)? = nil) {
+    private func sendJSON<T: Encodable>(_ message: T) {
         guard let task = webSocketTask else {
-            completion?(TranscriptionClientError.notConnected)
             return
         }
 
@@ -357,10 +355,8 @@ final class TranscriptionClient: NSObject {
                 if let error {
                     self?.emitEvent(.failure(error))
                 }
-                completion?(error)
             }
         } catch {
-            completion?(error)
             emitEvent(.failure(error))
         }
     }
