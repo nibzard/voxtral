@@ -55,10 +55,10 @@ final class AudioCapturePipeline {
         var channels: AVAudioChannelCount = 1
         var frameDuration: TimeInterval = 0.02
         var tapBufferSize: AVAudioFrameCount = 1024
-        var maxBufferedFrames: Int = 50
+        var maxBufferedFrames: Int = BackpressureDefaults.maxFrames
         var dropPolicy: DropPolicy = .dropOldest
-        var backpressureThreshold: Int = 25
-        var recoveryThreshold: Int = 10
+        var backpressureThreshold: Int = BackpressureDefaults.backpressureThreshold
+        var recoveryThreshold: Int = BackpressureDefaults.recoveryThreshold
 
         var frameSize: Int {
             max(1, Int((sampleRate * frameDuration).rounded()))

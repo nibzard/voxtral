@@ -284,6 +284,9 @@ final class BackendServiceManager: ObservableObject {
         if environment["VOXTRAL_TRANSCRIPTION_DELAY_MS"] == nil {
             environment["VOXTRAL_TRANSCRIPTION_DELAY_MS"] = "480"
         }
+        if environment["VOXTRAL_MAX_AUDIO_QUEUE_SIZE"] == nil {
+            environment["VOXTRAL_MAX_AUDIO_QUEUE_SIZE"] = "\(BackpressureDefaults.maxFrames)"
+        }
         if environment["VOXTRAL_MAX_MODEL_LEN"] == nil {
             // 131072 tokens ~3 hours at default settings
             environment["VOXTRAL_MAX_MODEL_LEN"] = "131072"

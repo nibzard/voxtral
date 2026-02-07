@@ -797,13 +797,17 @@
       "id": "T060",
       "title": "Coordinate backpressure thresholds across components",
       "priority": 3,
-      "status": "todo",
-      "details": "Backpressure is implemented in THREE places with different thresholds: Audio pipeline (threshold: 25, recovery: 10), WebSocket client (threshold: 25, recovery: 10), Backend (hardcoded: 50, no recovery). These aren't coordinated and could oscillate or conflict. P2 critical from architecture review. Reviewer: architecture-reviewer Review date: 2026-02-07.",
+      "status": "done",
+      "details": "Aligned backpressure defaults across audio capture, WebSocket client, and backend queue sizing. Added shared BackpressureDefaults constants in the app and passed VOXTRAL_MAX_AUDIO_QUEUE_SIZE to the backend, which now reads the env value for queue max.",
       "files": [
+        "VoxtralMenuBar/BackpressureDefaults.swift",
         "VoxtralMenuBar/AudioCapturePipeline.swift",
         "VoxtralMenuBar/TranscriptionClient.swift",
-        "backend/voxtral_backend/server.py"
-      ]
+        "VoxtralMenuBar/BackendServiceManager.swift",
+        "backend/voxtral_backend/server.py",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T19:53:16Z"
     },
     {
       "id": "T061",

@@ -23,9 +23,9 @@ final class TranscriptionClient: NSObject {
         var port: Int = TranscriptionClient.defaultPort
         var path: String = "/v1/transcribe"
         var useTLS: Bool = false
-        var maxPendingFrames: Int = 50
-        var backpressureThreshold: Int = 25
-        var recoveryThreshold: Int = 10
+        var maxPendingFrames: Int = BackpressureDefaults.maxFrames
+        var backpressureThreshold: Int = BackpressureDefaults.backpressureThreshold
+        var recoveryThreshold: Int = BackpressureDefaults.recoveryThreshold
         var backpressureEnabled: Bool = true
 
         var url: URL? {

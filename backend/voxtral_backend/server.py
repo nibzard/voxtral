@@ -17,7 +17,18 @@ from websockets.server import WebSocketServerProtocol
 from .config import ModelConfig, DEFAULT_CONFIG
 
 
-MAX_AUDIO_QUEUE_SIZE = 50
+def resolve_max_audio_queue_size() -> int:
+    raw_value = os.getenv("VOXTRAL_MAX_AUDIO_QUEUE_SIZE")
+    if not raw_value:
+        return 50
+    try:
+        value = int(raw_value)
+    except ValueError:
+        return 50
+    return max(1, value)
+
+
+MAX_AUDIO_QUEUE_SIZE = resolve_max_audio_queue_size()
 DEFAULT_HOST = "127.0.0.1"
 ALLOWED_HOSTNAMES = {"localhost"}
 
