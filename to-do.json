@@ -874,18 +874,19 @@
         "VoxtralMenuBar/PreferencesView.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:21:07Z"
+      "updated_at": "2026-02-07T20:21:33Z"
     },
     {
       "id": "T066",
       "title": "Remove or consolidate duplicate BackendServiceManagerTests file under Voxtral/",
       "priority": 4,
-      "status": "todo",
+      "status": "done",
       "details": "There is a second BackendServiceManagerTests.swift at Voxtral/VoxtralMenuBarTests/ that is not referenced by the Xcode project. Remove it or merge with the canonical test file to avoid drift/confusion.",
       "files": [
         "Voxtral/VoxtralMenuBarTests/BackendServiceManagerTests.swift",
-        "VoxtralMenuBarTests/BackendServiceManagerTests.swift"
-      ]
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:22:22Z"
     },
     {
       "id": "T067",
