@@ -937,7 +937,17 @@
         ".github/workflows/release.yml",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:46:36Z"
+      "updated_at": "2026-02-07T20:46:51Z"
+    },
+    {
+      "id": "PROJECT-DONE",
+      "title": "Project done: no new tasks",
+      "priority": 5,
+      "status": "done",
+      "tags": [
+        "project-done"
+      ],
+      "details": "Final review on 2026-02-07 found no additional tasks to add."
     }
   ]
 }
