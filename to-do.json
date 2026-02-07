@@ -902,6 +902,18 @@
         "to-do.json"
       ],
       "updated_at": "2026-02-07T20:23:46Z"
+    },
+    {
+      "id": "T069",
+      "title": "Stabilize Gemini rewrite flow against transcript races",
+      "priority": 2,
+      "status": "done",
+      "details": "performRewrite builds text from transcriptLines on demand; starting a new recording before the async task runs can clear this array, producing an empty rewrite. Capture a transcript snapshot at stop time and pass it into rewrite, and ensure isRewriting is reset with defer so early returns do not leave it stuck true. Consider disabling record while a rewrite is in flight.",
+      "files": [
+        "VoxtralMenuBar/MenuBarViewModel.swift",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:33:58Z"
     }
   ]
 }

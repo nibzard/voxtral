@@ -160,6 +160,9 @@ final class MenuBarViewModel: ObservableObject {
         if status == .recording || status == .transcribing || status == .initializing || status == .backpressure {
             return false
         }
+        if isRewriting {
+            return true
+        }
         return !isModelReady
     }
 
@@ -178,6 +181,7 @@ final class MenuBarViewModel: ObservableObject {
 
     private func startRecording() {
         guard !isStopping else { return }
+        guard !isRewriting else { return }
         clearError()
         transcriptLines.removeAll()
         recordingStartTime = Date().timeIntervalSince1970
@@ -285,10 +289,11 @@ final class MenuBarViewModel: ObservableObject {
                 AppLogger.shared.logRecordingStop(duration: duration)
             }
 
-            let shouldRewrite = self.hasGeminiAPIKey && self.isRewriteEnabled && !self.transcriptLines.isEmpty
+            let transcriptSnapshot = self.transcriptLines
+            let shouldRewrite = self.hasGeminiAPIKey && self.isRewriteEnabled && !transcriptSnapshot.isEmpty
             if shouldRewrite, let fileURL = outputFileURL {
                 Task { @MainActor in
-                    await self.performRewrite(for: fileURL)
+                    await self.performRewrite(for: fileURL, transcriptLines: transcriptSnapshot)
                 }
             }
 
@@ -496,10 +501,14 @@ final class MenuBarViewModel: ObservableObject {
 }
 
 private extension MenuBarViewModel {
-    func performRewrite(for fileURL: URL) async {
+    func performRewrite(for fileURL: URL, transcriptLines: [(timestampMs: Int, text: String)]) async {
         isRewriting = true
+        defer { isRewriting = false }
 
         let rawTranscript = transcriptLines.map { "[\(OutputWriter.formatTimestamp($0.timestampMs))] \($0.text)" }.joined(separator: "\n")
+        guard !rawTranscript.isEmpty else {
+            return
+        }
 
         do {
             guard let apiKey = try keychainManager?.retrieve(key: geminiAPIKeyKeychainKey) else {
@@ -516,8 +525,6 @@ private extension MenuBarViewModel {
         } catch {
             // Silently fail - the spec says to keep the original transcript on error
         }
-
-        isRewriting = false
     }
 
     func replaceTranscriptInFile(at url: URL, with rewrittenText: String) throws {
