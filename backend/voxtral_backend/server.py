@@ -359,7 +359,7 @@ class TranscriptionBackend:
         # Audio buffer for accumulating frames before transcription
         audio_buffer: bytearray = bytearray()
         frames_since_last_transcript = 0
-        delay_frames = session.transcription_delay_ms // 20  # 20ms per frame
+        delay_frames = max(1, session.transcription_delay_ms // 20)  # 20ms per frame
         drain_timeout_s = 1.0
 
         async def handle_frame(audio_bytes: bytes) -> None:
