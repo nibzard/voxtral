@@ -1,3 +1,5 @@
+# ABOUTME: WebSocket server implementing Voxtral real-time transcription.
+# ABOUTME: Manages sessions, audio queueing, and backend inference.
 """WebSocket server for Voxtral real-time speech transcription."""
 
 from __future__ import annotations

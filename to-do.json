@@ -840,14 +840,16 @@
       "id": "T063",
       "title": "Add ABOUTME file headers to all Python files",
       "priority": 3,
-      "status": "todo",
+      "status": "done",
       "details": "Per CLAUDE.md requirements, all code files should start with a brief 2-line comment with 'ABOUTME: ' prefix. None of the Python files have this. P2 critical from Python/ML review. Reviewer: python-ml-reviewer Review date: 2026-02-07.",
       "files": [
         "backend/voxtral_backend/__init__.py",
         "backend/voxtral_backend/__main__.py",
+        "backend/voxtral_backend/config.py",
         "backend/voxtral_backend/server.py",
-        "backend/voxtral_backend/config.py"
-      ]
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:08:08Z"
     }
   ]
 }

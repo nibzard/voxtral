@@ -1,3 +1,5 @@
+# ABOUTME: Configuration model and defaults for Voxtral backend runtime.
+# ABOUTME: Loads env overrides and normalizes dtype values.
 """Backend configuration for Voxtral transcription model."""
 
 from dataclasses import dataclass, field
