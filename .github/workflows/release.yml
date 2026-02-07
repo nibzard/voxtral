@@ -129,7 +129,7 @@ jobs:
         id: release_notes
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          cat > release-notes.md << 'EOF'
+          cat > release-notes.md << EOF
           # Voxtral Menu Bar Transcriber $VERSION
 
           ## What's Included

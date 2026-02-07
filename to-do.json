@@ -886,7 +886,7 @@
         "Voxtral/VoxtralMenuBarTests/BackendServiceManagerTests.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:22:22Z"
+      "updated_at": "2026-02-07T20:22:41Z"
     },
     {
       "id": "T067",
@@ -895,13 +895,13 @@
       "status": "done",
       "details": "PRODUCT_NAME is VoxtralMenuBar and Info.plist lacks CFBundleDisplayName, but README/UI refer to \"Voxtral Menu Bar Transcriber\". Decide the canonical app name and update bundle display name/docs (and transcript header if needed) to match.",
       "files": [
+        "README.md",
         "VoxtralMenuBar.xcodeproj/project.pbxproj",
         "VoxtralMenuBar/Info.plist",
-        "README.md",
         "VoxtralMenuBar/OutputWriter.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:23:46Z"
+      "updated_at": "2026-02-07T20:25:35Z"
     },
     {
       "id": "T068",
@@ -913,7 +913,7 @@
         "VoxtralMenuBar/MenuBarViewModel.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:42:44Z"
+      "updated_at": "2026-02-07T20:45:54Z"
     },
     {
       "id": "T069",
@@ -925,7 +925,19 @@
         "VoxtralMenuBar/MenuBarViewModel.swift",
         "to-do.json"
       ],
-      "updated_at": "2026-02-07T20:33:58Z"
+      "updated_at": "2026-02-07T20:40:35Z"
+    },
+    {
+      "id": "T070",
+      "title": "Fix release workflow version interpolation in release notes",
+      "priority": 4,
+      "status": "done",
+      "details": "The release.yml heredoc is single-quoted, so $VERSION is not expanded in release-notes.md. Use an unquoted heredoc or envsubst so the version appears correctly.",
+      "files": [
+        ".github/workflows/release.yml",
+        "to-do.json"
+      ],
+      "updated_at": "2026-02-07T20:46:36Z"
     }
   ]
 }
